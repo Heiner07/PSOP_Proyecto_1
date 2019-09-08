@@ -15,8 +15,10 @@ import java.util.List;
  */
 public class CPU {
     
-    static String[] memoria = new String[128];
-    static String[] disco = new String[1024];
+    static final int LARGOMEMORIA = 128;
+    static final int LARGODISCO = 1024;
+    static String[] memoria = new String[LARGOMEMORIA];
+    static String[] disco = new String[LARGODISCO];
     Nucleo nucleo1, nucleo2;
     List<Trabajo> colaTrabajoN1, colaTrabajoN2;
     List<BCP> procesos = new ArrayList<>();
