@@ -14,7 +14,7 @@ import java.io.IOException;
  *
  * @author home
  */
-public class Operaciones {
+public class Nucleo {
     
     //[0] = AC
     //[1] = AX

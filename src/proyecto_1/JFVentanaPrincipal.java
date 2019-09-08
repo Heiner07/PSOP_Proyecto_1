@@ -42,7 +42,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     private void reiniciarValores(){
         panelInstrucciones.removeAll();
         establecerValores();
-        Operaciones.limpiarClase();
+        Nucleo.limpiarClase();
     }
 
     /**
@@ -63,7 +63,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         panelInstrucciones = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Tarea_1");
+        setTitle("Proyecto_1");
 
         lbCargarArchivo.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         lbCargarArchivo.setText("Cargar archivo:");
@@ -146,8 +146,8 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         if(archivoCargado){
             try {
                 reiniciarValores();
-                Operaciones.muestraContenido(rutaArchivo);
-                posicionMemoria=Operaciones.posicionMemoria;
+                Nucleo.muestraContenido(rutaArchivo);
+                posicionMemoria=Nucleo.posicionMemoria;
                 btSiguienteActionPerformed(evt); // Funcion del boton Siguiente.
                 btSiguiente.setEnabled(true);
             } catch (IOException ex) {
@@ -159,16 +159,16 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btAnalizarArchivoActionPerformed
 
     private void btSiguienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSiguienteActionPerformed
-        if(paso<= (Operaciones.numeroInstrucciones *2) && posicionMemoria<99){
-            if(Operaciones.ejecutar){
+        if(paso<= (Nucleo.numeroInstrucciones *2) && posicionMemoria<99){
+            if(Nucleo.ejecutar){
                 JPPaso ejecutarInstruccion=new JPPaso(paso,posicionMemoria-1,instruccion,true);   
                 panelInstrucciones.add(ejecutarInstruccion);
-                Operaciones.ejecutar = false;
+                Nucleo.ejecutar = false;
                 instruccion++;
             }else{
                 JPPaso ejecucion=new JPPaso(paso,posicionMemoria,instruccion,false);
                 panelInstrucciones.add(ejecucion);
-                Operaciones.ejecutar = true;
+                Nucleo.ejecutar = true;
                 posicionMemoria++;
             }
             paso++;
