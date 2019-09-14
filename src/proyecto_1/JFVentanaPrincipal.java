@@ -111,7 +111,8 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     private void reiniciarValores(){
         panelInstrucciones.removeAll();
         establecerValores();
-        Nucleo.limpiarClase();
+        
+       // Nucleo.limpiarClase();
     }
     
     private List<String> obtenerArchivosAnalizar(){
@@ -873,7 +874,8 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             if(!archivosAnalizar.isEmpty()){
                 try {// Modificar el siguiente bloque, solo envia un archivo no todos
                     reiniciarValores();
-                    Nucleo.muestraContenido(rutaArchivo);
+                    Nucleo op = new Nucleo();     
+                    op.muestraContenido(rutaArchivo);
                     posicionMemoria=Nucleo.posicionMemoria;
                     btSiguienteActionPerformed(evt); // Funcion del boton Siguiente.
                     btSiguiente.setEnabled(true);

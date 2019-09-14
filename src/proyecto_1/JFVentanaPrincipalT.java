@@ -42,7 +42,7 @@ public class JFVentanaPrincipalT extends javax.swing.JFrame {
     private void reiniciarValores(){
         panelInstrucciones.removeAll();
         establecerValores();
-        Nucleo.limpiarClase();
+       // Nucleo.limpiarClase();
     }
 
     /**
@@ -146,7 +146,8 @@ public class JFVentanaPrincipalT extends javax.swing.JFrame {
         if(archivoCargado){
             try {
                 reiniciarValores();
-                Nucleo.muestraContenido(rutaArchivo);
+                Nucleo op = new Nucleo();     
+                op.muestraContenido(rutaArchivo);
                 posicionMemoria=Nucleo.posicionMemoria;
                 btSiguienteActionPerformed(evt); // Funcion del boton Siguiente.
                 btSiguiente.setEnabled(true);

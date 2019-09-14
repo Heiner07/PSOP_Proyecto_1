@@ -32,7 +32,7 @@ public class Nucleo {
         parts = instrucciones.split(" ");
         String operacion = parts[0];
         String registro = parts[1];
-        String numero = parts[2];        
+        String numeroORegistro = parts[2];        
         switch(operacion) {
             case "0001"://LOAD
                 arregloRegistros[0] = arregloRegistros[registroPosicion(registro)];              
@@ -43,23 +43,38 @@ public class Nucleo {
                 break;
                 
             case "0011"://MOV
-               movimiento(registro,numero);
+               movimiento(registro,numeroORegistro);
                 break; 
                 
             case "0100"://SUB
-                restar(registro,numero);
+                restar(registro,numeroORegistro);
                 break;
                 
             case "0101"://ADD
-                sumar(registro, numero);
+                sumar(registro, numeroORegistro);
                 break;
-
+            case "0110"://INC               
+                break;
+            case "0111"://DEC
+                break;
+            case "1000"://INT 20H
+                break;
+            case "1001"://JUM [+/-Desplazamiento]
+                break;
+            case "1010"://CMP Val1,Val2
+                break;
+            case "1011"://JE [ +/-Desplazamiento]
+                break;
+            case "1100"://JNE [ +/-Desplazamiento]
+                break;
+            case "1101"://POP AX
+                break;          
             default:             
                 break;
         }
     }
      
-    public static void muestraContenido(String archivo) throws FileNotFoundException, IOException {
+    public void muestraContenido(String archivo) throws FileNotFoundException, IOException {
         String cadena;
         String cadena2 ="";
         
@@ -80,22 +95,45 @@ public class Nucleo {
         memoriaToBits();
     }
     
-    public static void memoriaToBits(){
+    public void memoriaToBits(){
         String[] parteOperacion,parteResto;
         String instruccionEnbits;
         int largo=posicionMemoria+numeroInstrucciones;
         for(int i=posicionMemoria;i<largo;i++){
             parteOperacion = memoria[i].split(" ");
             instruccionEnbits = parteOperacion[0];
-            parteResto = parteOperacion[1].split(",");
-            if(parteResto.length >=2){
-                memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));              
+            if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
+                 if(parteOperacion.length == 2){
+                     
+                     memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
+                 
+                 }else{
+                    memoria[i] = toBinario(instruccionEnbits)+" "+"0000"+" 00000000";                  
+                 }
+                                 
             }else{
-               memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";
-            }
-            //System.out.println(memoria[i]);
-        }
-    }
+                parteResto = parteOperacion[1].split(",");
+                if(parteResto.length >=2){
+                    try{
+                        memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));                   
+                    }catch(Exception e){
+                        memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);    
+                    }
+
+                }else{
+                    //Verifico si es jum, je, jne
+                    if("JUM".equals(instruccionEnbits) || "JE".equals(instruccionEnbits) || "JNE".equals(instruccionEnbits)){
+                        memoria[i] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
+                    
+                    }else{
+                        memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
+                    }
+                    
+                }//SALE ELSE DENTRO              
+            }//SALE ELSE
+            System.out.println(memoria[i]);
+        }//FOR
+    }//FUNCION
     
     public static int registroPosicion(String registro){       
         switch(registro) {
@@ -122,6 +160,8 @@ public class Nucleo {
                 return "0011";
             case "DX"://DX
                return "0100";
+               
+               
             case "LOAD"://LOAD
                return "0001";
             case "STORE"://STORE
@@ -131,7 +171,29 @@ public class Nucleo {
             case "SUB"://SUB
                return "0100";                
             case "ADD"://ADD
-               return "0101";
+               return "0101"; 
+            case "INC"://INC    
+                return "0110";
+            case "DEC"://DEC
+                return "0111";
+            case "INT"://INT
+                return "1000";
+            case "JUM"://JUM [+/-Desplazamiento]
+                return "1001";
+            case "CMP"://CMP Val1,Val2
+                return "1010";
+            case "JE"://JE [ +/-Desplazamiento]
+                return "1011";
+            case "JNE"://JNE [ +/-Desplazamiento]
+                return "1100";
+            case "POP"://POP AX
+                return "1101";                
+            case "20H":
+                return "0101";
+            case "16H":
+                return "0110";
+            case "05H":
+                return "0111";               
             default:
                 return "0000";
         }    
@@ -139,8 +201,13 @@ public class Nucleo {
     
     
     public void movimiento(String registro, String numero){
-        
-        int numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
+        int numeroDecimal;
+        if(numero.length() == 8){
+            numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
+        }else{
+            //Es un registro entonces accedo a la dirección del registro para obtener el número
+            numeroDecimal = arregloRegistros[registroPosicion(numero.substring(5, 9))];       
+        }
         if("1".equals(numero.substring(0,1))){
             numeroDecimal *= -1;           
         }
@@ -148,8 +215,14 @@ public class Nucleo {
         
     }
     
-    public void sumar(String registro, String numero){
-        int numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
+    public void sumar(String registro, String numero){     
+        int numeroDecimal;
+        if(numero.length() == 8){
+            numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
+        }else{
+            //Es un registro entonces accedo a la dirección del registro para obtener el número
+            numeroDecimal = arregloRegistros[registroPosicion(numero.substring(5, 9))];       
+        }
         if(numero.equals("00000000")){
             arregloRegistros[0] += arregloRegistros[registroPosicion(registro)];
         }else{            
@@ -162,7 +235,13 @@ public class Nucleo {
     
     
     public void restar(String registro, String numero){
-        int numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
+        int numeroDecimal;
+        if(numero.length() == 8){
+            numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
+        }else{
+            //Es un registro entonces accedo a la dirección del registro para obtener el número
+            numeroDecimal = arregloRegistros[registroPosicion(numero.substring(5, 9))];       
+        }
         if(numero.equals("00000000")){
             arregloRegistros[0] -= arregloRegistros[registroPosicion(registro)];
         }else{            
@@ -189,11 +268,11 @@ public class Nucleo {
         return temp;
     }
     
-    public static void limpiarClase(){
+    /*public static void limpiarClase(){
         arregloRegistros = new int[]{0,0,0,0,0};
         memoria = new String[100];
         posicionMemoria=0;
         numeroInstrucciones=0;
         ejecutar = false;
-    }
+    }*/
 }
