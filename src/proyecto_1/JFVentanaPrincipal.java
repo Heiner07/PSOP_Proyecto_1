@@ -6,6 +6,8 @@
 package proyecto_1;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -31,6 +34,11 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     Boolean archivoCargado;
     DefaultTableModel modeloTablaArchivos, modeloTablaMemoria, modeloTablaDisco;
     List<String> archivos;
+    List<JPBCP> BCPs; // Lista de control de BCPs
+    CPU cpu;
+    
+    /* Hilos de control */
+    Timer timerControlBCPs;
     
     /**
      * Creates new form JFVentanaPrincipal
@@ -41,8 +49,11 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         configurarTablaMemoria();
         configurarTablaDisco();
         //configurarTabla();
+        configurarHilosDeControl();
         this.archivos=new ArrayList<>();
+        this.BCPs=new ArrayList<>();
         this.modeloTablaArchivos = (DefaultTableModel) jtArchivos.getModel();
+        this.cpu=new CPU();
         this.archivoCargado=false;
         this.setLocationRelativeTo(null);
     }
@@ -108,6 +119,22 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         this.instruccion=1;
     }
     
+    /**
+     * Establece la funcion para el timer timerControlBCPs que se encargará de actualizar...
+     * ...los valores de los BCPs en la interfaz gráfica.
+     */
+    private void configurarHilosDeControl(){
+        timerControlBCPs = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                // Funcion que repetirá segun el intervalo asignado (1 segundo).
+                controlGraficoBCPs();
+            }
+        });
+        // Inicializo el timer.
+        timerControlBCPs.start();
+    }
+    
     private void reiniciarValores(){
         panelInstrucciones.removeAll();
         establecerValores();
@@ -124,6 +151,41 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
                 archivosAnalizar.add(archivos.get(i));
             }
         }return archivosAnalizar;
+    }
+    
+    /**
+     * Limpia los BCPs (o procesos) que se muestran en la interfaz gráfica
+     * Y la lista de control.
+     */
+    private void limpiarProcesosInterfaz(){
+        panelBCPs.removeAll();
+        BCPs.clear();
+    }
+    
+    /**
+     * Controla los BCPs que se muestran en la interfaz gráfica.
+     * Carga los BCPs del cpu, limpia los elementos gráficos y carga unos nuevos...
+     * ...con la información actualizada.
+     * Este método es invocado por el timer timerControlBCPs.
+     */
+    private void controlGraficoBCPs(){
+        // Obtengo todos los procesos del CPU
+        List<BCP> procesos = cpu.obtenerProcesos();
+        int numeroProcesos = procesos.size();
+        JPBCP procesoInterfaz;
+        BCP proceso;
+        // Limpio los BCPs de la interfaz gráfica
+        limpiarProcesosInterfaz();
+        for(int i=0;i<numeroProcesos;i++){
+            proceso=procesos.get(i);
+            // Creo el nuevo BCP gráfico.
+            procesoInterfaz=new JPBCP(proceso.obtenerNumeroProceso(), proceso.obtenerEstadoProceso(),
+                    proceso.obtenerDireccionpila(), proceso.obtenerInicioMemoria(), proceso.obtenerFinMemoria(),
+                    proceso.obtenerTiempoEjecucion(), proceso.obtenerRegistros());
+            panelBCPs.add(procesoInterfaz); // Agrego el nuevo BCP gráfico al panel de BCPs
+            BCPs.add(procesoInterfaz); // Agrego el nuevo BCP gráfico a la lista de control
+        }// Actualizo el panel de BCPs
+        panelBCPs.updateUI();
     }
 
     /**
@@ -904,9 +966,9 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
                 posicionMemoria++;
             }
             // PROBANDO
-            JPBCP proceso=new JPBCP();
-            panelBCPs.add(proceso);
-            panelBCPs.updateUI();
+            //Creo un proceso en la cpu
+            cpu.crearProceso();
+            // PROBANDO
             paso++;
             jScrollPane2.getVerticalScrollBar().setValue(jScrollPane2.getVerticalScrollBar().getMaximum());
             panelInstrucciones.updateUI();

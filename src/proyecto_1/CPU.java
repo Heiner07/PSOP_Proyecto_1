@@ -31,4 +31,39 @@ public class CPU {
         this.procesos = new ArrayList<>();
     }
     
+    public Nucleo obtenerNucleo1(){
+        return nucleo1;
+    }
+    
+    public Nucleo obtenerNucleo2(){
+        return nucleo2;
+    }
+    
+    public List<Trabajo> obtenerColaTrabajoN1(){
+        return colaTrabajoN1;
+    }
+    
+    public List<Trabajo> obtenerColaTrabajoN2(){
+        return colaTrabajoN2;
+    }
+    
+    public List<BCP> obtenerProcesos(){
+        return procesos;
+    }
+    
+    private void verificaProcesos(){
+        int numeroProcesos=procesos.size();
+        BCP proceso;
+        for(int i=0;i<numeroProcesos;i++){
+            proceso=procesos.get(i);
+            if(proceso.obtenerEstadoProceso()==BCP.EN_ESPERA){
+                
+            }
+        }
+    }
+    
+    public void crearProceso(){
+        BCP proceso=new BCP(BCP.NUEVO, procesos.size(), 0, 0, 30);
+        procesos.add(proceso);
+    }
 }
