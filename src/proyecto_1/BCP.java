@@ -22,15 +22,15 @@ public class BCP {
     static int PREPARADO=3;
     static int TERMINADO=4;
     
-    int estadoProceso;
-    int numeroProceso;
-    int PC;
-    int AX, BX, CX, DX, IR, AC, direccionPila;
+    private int estadoProceso;
+    private int numeroProceso;
+    private int PC;
+    private int AX, BX, CX, DX, IR, AC, direccionPila;
     Timer timer;
     int segundos;
     
     //Limites de memoria
-    int inicioMemoria, finMemoria;
+    private int inicioMemoria, finMemoria;
     
     public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria){
         this.AX=0;
@@ -52,6 +52,7 @@ public class BCP {
                 segundos++;
             }
         });
+        this.timer.start();
     }
     
     public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC){
@@ -63,12 +64,50 @@ public class BCP {
         this.AC=AC;
     }
     
+    public int obtenerNumeroProceso(){
+        return numeroProceso;
+    }
+    
+    public int obtenerEstadoProceso(){
+        return estadoProceso;
+    }
+    
+    public int obtenerDireccionpila(){
+        return direccionPila;
+    }
+    
+    public int obtenerInicioMemoria(){
+        return inicioMemoria;
+    }
+    
+    public int obtenerFinMemoria(){
+        return finMemoria;
+    }
+    
+    public int obtenerPC(){
+        return PC;
+    }
+    
     public int[] obtenerRegistros(){
-        return new int[]{AX, BX, CX, DX, IR, AC};
+        return new int[]{AX, BX, CX, DX, IR, AC, PC};
     }
     
     public int obtenerTiempoEjecucion(){
         return segundos;
     }
     
+    public static String estadoProcesoCadena(int estadoProceso){
+        String estadoProcesoCadena;
+        if(estadoProceso==BCP.EN_EJECUCION){
+            estadoProcesoCadena="En Ejecución";
+        }else if(estadoProceso==BCP.EN_ESPERA){
+            estadoProcesoCadena="En Espera";
+        }else if(estadoProceso==BCP.NUEVO){
+            estadoProcesoCadena="Nuevo";
+        }else if(estadoProceso==BCP.PREPARADO){
+            estadoProcesoCadena="Preparado";
+        }else{
+            estadoProcesoCadena="Terminado";
+        }return estadoProcesoCadena;
+    }
 }

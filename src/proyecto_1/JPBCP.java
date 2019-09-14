@@ -7,15 +7,48 @@ package proyecto_1;
 
 /**
  *
- * @author Heine
+ * @author Heiner
  */
 public class JPBCP extends javax.swing.JPanel {
 
     /**
-     * Creates new form JPBCP2
+     * Creates new form JPBCP
+     * @param numeroProceso
+     * @param estadoProceso
+     * @param direccionPila
+     * @param inicioMemoria
+     * @param finMemoria
+     * @param tiempoEjecucion
+     * @param registros
      */
-    public JPBCP() {
+    public JPBCP(int numeroProceso, int estadoProceso, int direccionPila,
+            int inicioMemoria, int finMemoria, int tiempoEjecucion, int[] registros) {
         initComponents();
+        this.lbNumeroProceso.setText(String.valueOf(numeroProceso));
+        this.lbEstadoProceso.setText(BCP.estadoProcesoCadena(estadoProceso));
+        this.lbDireccionPila.setText(String.valueOf(direccionPila));
+        this.lbInicioMemoria.setText(String.valueOf(inicioMemoria));
+        this.lbFinMemoria.setText(String.valueOf(finMemoria));
+        this.lbTiempoEjecucion.setText(String.valueOf(tiempoEjecucion));
+        establecerRegistros(registros);
+    }
+    
+    public void establecerEstadoProceso(String estado){
+        lbEstadoProceso.setText(estado);
+    }
+    
+    public void establecerTiempo(String tiempo){
+        lbTiempoEjecucion.setText(tiempo);
+    }
+    
+    private void establecerRegistros(int[] registros){
+        lbAX.setText(String.valueOf(registros[0]));
+        lbBX.setText(String.valueOf(registros[1]));
+        lbCX.setText(String.valueOf(registros[2]));
+        lbDX.setText(String.valueOf(registros[3]));
+        lbIR.setText(String.valueOf(registros[4]));
+        lbAC.setText(String.valueOf(registros[5]));
+        lbPC.setText(String.valueOf(registros[6]));
     }
 
     /**
