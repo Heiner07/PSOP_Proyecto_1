@@ -21,13 +21,14 @@ public class CPU {
     static String[] disco = new String[LARGODISCO];
     Nucleo nucleo1, nucleo2;
     List<Trabajo> colaTrabajoN1, colaTrabajoN2;
-    List<BCP> procesos = new ArrayList<>();
+    List<BCP> procesos;
     
     public CPU(){
         this.nucleo1 = new Nucleo();
         this.nucleo2 = new Nucleo();
         this.colaTrabajoN1 = new ArrayList<>();
         this.colaTrabajoN2 = new ArrayList<>();
+        this.procesos = new ArrayList<>();
     }
     
 }
