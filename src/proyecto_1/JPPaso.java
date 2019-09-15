@@ -24,10 +24,10 @@ public class JPPaso extends javax.swing.JPanel {
      * @param ejecucion
      */
     
-    public JPPaso(int paso,int posicionMemoria, int numeroInstruccion, Boolean ejecucion) {
+    public JPPaso(int paso,int posicionMemoria, int numeroInstruccion, int[] registros, Boolean ejecucion) {
         initComponents();
         realizarEjecucion(posicionMemoria, ejecucion);
-        establecerValoresMemoriaRegistros(paso, posicionMemoria, numeroInstruccion);
+        establecerValoresMemoriaRegistros(paso, posicionMemoria, numeroInstruccion, registros);
     }
     
     private void realizarEjecucion(int posicionMemoria, Boolean ejecucion){
@@ -38,7 +38,7 @@ public class JPPaso extends javax.swing.JPanel {
         }tfRegistroPC.setText(Integer.toString(posicionMemoria));
     }
     
-    private void establecerValoresMemoriaRegistros(int paso,int posicionMemoria, int numeroInstruccion){
+    private void establecerValoresMemoriaRegistros(int paso,int posicionMemoria, int numeroInstruccion, int[] registros){
         int instrucciones=Nucleo.numeroInstrucciones-numeroInstruccion;
         String[] parts;
         parts = Nucleo.memoria[posicionMemoria].split(" ");
@@ -77,11 +77,11 @@ public class JPPaso extends javax.swing.JPanel {
             tfValor3.setText("000000000");
             lbMemoria3.setText(String.valueOf(posicionMemoria+2));
         }
-        tfRegistroAC.setText(Integer.toString(Nucleo.arregloRegistros[0]));
-        tfRegistroAX.setText(Integer.toString(Nucleo.arregloRegistros[1]));
-        tfRegistroBX.setText(Integer.toString(Nucleo.arregloRegistros[2]));
-        tfRegistroCX.setText(Integer.toString(Nucleo.arregloRegistros[3]));
-        tfRegistroDX.setText(Integer.toString(Nucleo.arregloRegistros[4]));
+        tfRegistroAC.setText(Integer.toString(registros[0]));
+        tfRegistroAX.setText(Integer.toString(registros[1]));
+        tfRegistroBX.setText(Integer.toString(registros[2]));
+        tfRegistroCX.setText(Integer.toString(registros[3]));
+        tfRegistroDX.setText(Integer.toString(registros[4]));
         tfRegistroIR.setText(Nucleo.memoria[posicionMemoria]);
         lbPaso.setText("Paso: "+paso);
     }

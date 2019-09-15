@@ -148,7 +148,7 @@ public class JFVentanaPrincipalT extends javax.swing.JFrame {
                 reiniciarValores();
                 Nucleo op = new Nucleo();     
                 op.muestraContenido(rutaArchivo);
-                posicionMemoria=Nucleo.posicionMemoria;
+                posicionMemoria=op.obtenerPC();
                 btSiguienteActionPerformed(evt); // Funcion del boton Siguiente.
                 btSiguiente.setEnabled(true);
             } catch (IOException ex) {
@@ -162,13 +162,13 @@ public class JFVentanaPrincipalT extends javax.swing.JFrame {
     private void btSiguienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSiguienteActionPerformed
         if(paso<= (Nucleo.numeroInstrucciones *2) && posicionMemoria<99){
             if(Nucleo.ejecutar){
-                JPPaso ejecutarInstruccion=new JPPaso(paso,posicionMemoria-1,instruccion,true);   
-                panelInstrucciones.add(ejecutarInstruccion);
+                //JPPaso ejecutarInstruccion=new JPPaso(paso,posicionMemoria-1,instruccion,true);   
+                //panelInstrucciones.add(ejecutarInstruccion);
                 Nucleo.ejecutar = false;
                 instruccion++;
             }else{
-                JPPaso ejecucion=new JPPaso(paso,posicionMemoria,instruccion,false);
-                panelInstrucciones.add(ejecucion);
+                //JPPaso ejecucion=new JPPaso(paso,posicionMemoria,instruccion,false);
+                //panelInstrucciones.add(ejecucion);
                 Nucleo.ejecutar = true;
                 posicionMemoria++;
             }

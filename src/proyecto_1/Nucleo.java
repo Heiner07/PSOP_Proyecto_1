@@ -21,9 +21,9 @@ public class Nucleo {
     //[2] = BX
     //[3] = CX
     //[4] = DX
-    static int[] arregloRegistros = {0,0,0,0,0};
+    private int[] registros = {0,0,0,0,0};
     static String[] memoria = new String[100];
-    static int posicionMemoria=0;
+    private int PC=0, IR=0;
     static int numeroInstrucciones=0;
     static boolean ejecutar = false;
     
@@ -35,11 +35,11 @@ public class Nucleo {
         String numeroORegistro = parts[2];        
         switch(operacion) {
             case "0001"://LOAD
-                arregloRegistros[0] = arregloRegistros[registroPosicion(registro)];              
+                registros[0] = registros[registroPosicion(registro)];              
                 break;    
                 
             case "0010"://STORE
-                arregloRegistros[registroPosicion(registro)] = arregloRegistros[0];
+                registros[registroPosicion(registro)] = registros[0];
                 break;
                 
             case "0011"://MOV
@@ -86,9 +86,9 @@ public class Nucleo {
         }
         String[] cadenaTemp=cadena2.split("\n");
         numeroInstrucciones=cadenaTemp.length;
-        posicionMemoria=(int) (Math.random() * 80);
+        PC=(int) (Math.random() * 80);
         //System.out.println("Posicion de memoria: "+posicionMemoria);
-        int posicionMemoriaTemp=posicionMemoria;
+        int posicionMemoriaTemp=PC;
         for(int i=0; i<numeroInstrucciones && posicionMemoriaTemp<memoria.length; posicionMemoriaTemp++,i++){
             memoria[posicionMemoriaTemp]=cadenaTemp[i];
         }
@@ -98,8 +98,8 @@ public class Nucleo {
     public void memoriaToBits(){
         String[] parteOperacion,parteResto;
         String instruccionEnbits;
-        int largo=posicionMemoria+numeroInstrucciones;
-        for(int i=posicionMemoria;i<largo;i++){
+        int largo=PC+numeroInstrucciones;
+        for(int i=PC;i<largo;i++){
             parteOperacion = memoria[i].split(" ");
             instruccionEnbits = parteOperacion[0];
             if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
@@ -150,10 +150,10 @@ public class Nucleo {
         }
     }
     
-    public static String toBinario(String registro){      
+    public String toBinario(String registro){      
         switch(registro) {
             case "AX"://AX                    
-                 return "0001";   
+                 return "0001";
             case "BX"://BX
                 return "0010";                                  
             case "CX"://CX
@@ -206,12 +206,12 @@ public class Nucleo {
             numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
         }else{
             //Es un registro entonces accedo a la dirección del registro para obtener el número
-            numeroDecimal = arregloRegistros[registroPosicion(numero.substring(5, 9))];       
+            numeroDecimal = registros[registroPosicion(numero.substring(5, 9))];       
         }
         if("1".equals(numero.substring(0,1))){
             numeroDecimal *= -1;           
         }
-        arregloRegistros[registroPosicion(registro)] = numeroDecimal;
+        registros[registroPosicion(registro)] = numeroDecimal;
         
     }
     
@@ -221,15 +221,15 @@ public class Nucleo {
             numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
         }else{
             //Es un registro entonces accedo a la dirección del registro para obtener el número
-            numeroDecimal = arregloRegistros[registroPosicion(numero.substring(5, 9))];       
+            numeroDecimal = registros[registroPosicion(numero.substring(5, 9))];       
         }
         if(numero.equals("00000000")){
-            arregloRegistros[0] += arregloRegistros[registroPosicion(registro)];
+            registros[0] += registros[registroPosicion(registro)];
         }else{            
             if("1".equals(numero.substring(0,1))){
                 numeroDecimal *= -1;           
             }
-            arregloRegistros[registroPosicion(registro)] += numeroDecimal;
+            registros[registroPosicion(registro)] += numeroDecimal;
         }       
     }
     
@@ -240,20 +240,19 @@ public class Nucleo {
             numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
         }else{
             //Es un registro entonces accedo a la dirección del registro para obtener el número
-            numeroDecimal = arregloRegistros[registroPosicion(numero.substring(5, 9))];       
+            numeroDecimal = registros[registroPosicion(numero.substring(5, 9))];       
         }
         if(numero.equals("00000000")){
-            arregloRegistros[0] -= arregloRegistros[registroPosicion(registro)];
+            registros[0] -= registros[registroPosicion(registro)];
         }else{            
             if("1".equals(numero.substring(0,1))){
                 numeroDecimal *= -1;           
             }
-            arregloRegistros[registroPosicion(registro)] -= numeroDecimal;
+            registros[registroPosicion(registro)] -= numeroDecimal;
         }
     }
     
-    
-    public static String decimalABinaro(int a) {
+    public String decimalABinaro(int a) {
         boolean negativo = false;
         if(a<0){
             a *=-1;
@@ -266,6 +265,18 @@ public class Nucleo {
         }
         if(negativo){temp="1"+temp;}else{temp="0"+temp;}
         return temp;
+    }
+    
+    public int obtenerPC(){
+        return PC;
+    }
+    
+    public int obtenerIR(){
+        return IR;
+    }
+    
+    public int[] obtenerRegistros(){
+        return registros;
     }
     
     /*public static void limpiarClase(){
