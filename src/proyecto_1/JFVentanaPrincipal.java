@@ -32,12 +32,13 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     String rutaArchivo;
     Boolean archivoCargado;
     DefaultTableModel modeloTablaArchivos, modeloTablaMemoria, modeloTablaDisco;
+    DefaultTableModel modeloTablaColaN1, modeloTablaColaN2;
     List<String> archivos;
     List<JPBCP> BCPs; // Lista de control de BCPs
     CPU cpu;
     
     /* Hilos de control */
-    Timer timerControlBCPs, timerControlNucleos;
+    Timer timerControlBCPs, timerControlNucleos, timerControlColaNucleos;
     
     /**
      * Creates new form JFVentanaPrincipal
@@ -47,6 +48,8 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         establecerValores();
         configurarTablaMemoria();
         configurarTablaDisco();
+        this.modeloTablaColaN1 = (DefaultTableModel) jtColaN1.getModel();
+        this.modeloTablaColaN2 = (DefaultTableModel) jtColaN2.getModel();
         //configurarTabla();
         configuararHilos();
         this.archivos=new ArrayList<>();
@@ -125,6 +128,55 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     private void configuararHilos(){
         configurarHiloBCPs();
         configurarHiloNucleos();
+        configurarHiloColaNucleos();
+    }
+    
+    /**
+     * Establece la funcion para el timer timerControlColaNucleos que se encargará de actualizar...
+     * ...los valores en la interfaz gráfica.
+     */
+    private void configurarHiloColaNucleos(){
+        timerControlColaNucleos = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                // Funcion que repetirá segun el intervalo asignado (1 segundo).
+                controlGraficoColaNucleos();
+            }
+        });
+        // Inicializo el timer.
+        timerControlColaNucleos.start();
+    }
+    
+    /**
+     * Controla las colas de los Núcleos que se muestran en la interfaz gráfica.
+     * Carga las Colas de los Núcleos del cpu, actualiza los valores en la interfaz gráfica.
+     * Este método es invocado por el timer timerControlColaNucleos.
+     */
+    private void controlGraficoColaNucleos(){
+        // Obtengo todos los procesos del CPU
+        List<Trabajo> colaN1 = cpu.obtenerColaTrabajoN1();
+        List<Trabajo> colaN2 = cpu.obtenerColaTrabajoN2();
+        int numeroProcesosColaN1 = colaN1.size();
+        int numeroProcesosColaN2 = colaN2.size();
+        limpiarColas();
+        for(int i=0;i<numeroProcesosColaN1;i++){
+            modeloTablaColaN1.addRow(new Object[]{"BCP "+colaN1.get(i).obtenerNumeroBCP()});
+        }
+        for(int i=0;i<numeroProcesosColaN2;i++){
+            modeloTablaColaN2.addRow(new Object[]{"BCP "+colaN2.get(i).obtenerNumeroBCP()});
+        }
+    }
+    
+    
+    private void limpiarColas(){
+        int numeroFilasColaN1=modeloTablaColaN1.getRowCount();
+        int numeroFilasColaN2=modeloTablaColaN2.getRowCount();
+        for(int i=numeroFilasColaN1-1;0<=i;i--){
+            modeloTablaColaN1.removeRow(i);
+        }
+        for(int i=numeroFilasColaN2-1;0<=i;i--){
+            modeloTablaColaN2.removeRow(i);
+        }
     }
     
     /**
@@ -193,26 +245,6 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         timerControlBCPs.start();
     }
     
-    private List<String> obtenerArchivosAnalizar(){
-        List<String> archivosAnalizar=new ArrayList<>();
-        int cantidadArchivos=modeloTablaArchivos.getRowCount();
-        for(int i=0;i<cantidadArchivos;i++){
-            Boolean ejecutar=(Boolean) modeloTablaArchivos.getValueAt(i, 1);
-            if(ejecutar){
-                archivosAnalizar.add(archivos.get(i));
-            }
-        }return archivosAnalizar;
-    }
-    
-    /**
-     * Limpia los BCPs (o procesos) que se muestran en la interfaz gráfica
-     * Y la lista de control.
-     */
-    private void limpiarProcesosInterfaz(){
-        panelBCPs.removeAll();
-        BCPs.clear();
-    }
-    
     /**
      * Controla los BCPs que se muestran en la interfaz gráfica.
      * Carga los BCPs del cpu, limpia los elementos gráficos y carga unos nuevos...
@@ -237,6 +269,26 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             BCPs.add(procesoInterfaz); // Agrego el nuevo BCP gráfico a la lista de control
         }// Actualizo el panel de BCPs
         panelBCPs.updateUI();
+    }
+    
+    private List<String> obtenerArchivosAnalizar(){
+        List<String> archivosAnalizar=new ArrayList<>();
+        int cantidadArchivos=modeloTablaArchivos.getRowCount();
+        for(int i=0;i<cantidadArchivos;i++){
+            Boolean ejecutar=(Boolean) modeloTablaArchivos.getValueAt(i, 1);
+            if(ejecutar){
+                archivosAnalizar.add(archivos.get(i));
+            }
+        }return archivosAnalizar;
+    }
+    
+    /**
+     * Limpia los BCPs (o procesos) que se muestran en la interfaz gráfica
+     * Y la lista de control.
+     */
+    private void limpiarProcesosInterfaz(){
+        panelBCPs.removeAll();
+        BCPs.clear();
     }
 
     /**

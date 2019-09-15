@@ -15,7 +15,6 @@ public class Proyecto_1 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Nucleo op = new Nucleo();
         JFVentanaPrincipal ventana=new JFVentanaPrincipal();
         ventana.setVisible(true);
     }

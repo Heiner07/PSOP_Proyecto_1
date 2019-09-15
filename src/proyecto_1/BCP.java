@@ -26,13 +26,14 @@ public class BCP {
     private int numeroProceso;
     private int PC;
     private int AX, BX, CX, DX, IR, AC, direccionPila;
+    private int nucleo;
     Timer timer;
     int segundos;
     
     //Limites de memoria
     private int inicioMemoria, finMemoria;
     
-    public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria){
+    public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria, int nucleo){
         this.AX=0;
         this.BX=0;
         this.CX=0;
@@ -45,6 +46,7 @@ public class BCP {
         this.inicioMemoria=inicioMemoria;
         this.finMemoria=finMemoria;
         this.PC=inicioMemoria;
+        this.nucleo=nucleo;
         this.segundos=0;
         this.timer=new Timer(1000, new ActionListener() {
             @Override
@@ -55,13 +57,14 @@ public class BCP {
         this.timer.start();
     }
     
-    public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC){
+    public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC, int PC){
         this.AX=AX;
         this.BX=BX;
         this.CX=CX;
         this.DX=DX;
         this.IR=IR;
         this.AC=AC;
+        this.PC=PC;
     }
     
     public int obtenerNumeroProceso(){

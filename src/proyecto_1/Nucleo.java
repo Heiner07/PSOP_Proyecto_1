@@ -5,10 +5,15 @@
  */
 package proyecto_1;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.Timer;
 
 /**
  *
@@ -24,10 +29,40 @@ public class Nucleo {
     private int[] registros = {0,0,0,0,0};
     static String[] memoria = new String[100];
     private int PC=0, IR=0;
+    private BCP procesoEjecutando=null;
     static int numeroInstrucciones=0;
     static boolean ejecutar = false;
+    private Boolean listo = true; // Indica si está listo para ejecutar otra instrucción.
+    private Boolean ejecutar1 = false;
+    private Timer timerOperacion;
     
-    public void Operaciones(String instrucciones){
+    public Nucleo(){
+        timerOperacion = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    // Función que repetirá según el intervalo asignado (1 segundo).
+                    if(ejecutar1){
+                        ejecutar1=false;
+                        Operaciones("");
+                        
+                    }
+                } catch (InterruptedException ex) {
+                    // Modificar para mostrar mensaje correspondiente
+                    Logger.getLogger(Nucleo.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        // Inicializo el timer.
+        timerOperacion.start();
+    }
+    
+    public void Operaciones(String instrucciones2) throws InterruptedException{
+        listo=false;
+        // Asigno el IR
+        IR=PC;
+        // Traigo la instrucción de memoria y aumento el PC
+        String instrucciones = CPU.memoria[PC++];
         String[] parts;
         parts = instrucciones.split(" ");
         String operacion = parts[0];
@@ -35,23 +70,28 @@ public class Nucleo {
         String numeroORegistro = parts[2];        
         switch(operacion) {
             case "0001"://LOAD
-                registros[0] = registros[registroPosicion(registro)];              
+                registros[0] = registros[registroPosicion(registro)]; 
+                Thread.sleep(TiempoInstrucciones.LOAD*1000);
                 break;    
                 
             case "0010"://STORE
                 registros[registroPosicion(registro)] = registros[0];
+                Thread.sleep(TiempoInstrucciones.STORE*1000);
                 break;
                 
             case "0011"://MOV
                movimiento(registro,numeroORegistro);
-                break; 
+               Thread.sleep(TiempoInstrucciones.MOV*1000);
+               break; 
                 
             case "0100"://SUB
                 restar(registro,numeroORegistro);
+                Thread.sleep(TiempoInstrucciones.SUB*1000);
                 break;
                 
             case "0101"://ADD
                 sumar(registro, numeroORegistro);
+                Thread.sleep(TiempoInstrucciones.ADD*1000);
                 break;
             case "0110"://INC               
                 break;
@@ -71,7 +111,7 @@ public class Nucleo {
                 break;          
             default:             
                 break;
-        }
+        }listo=true;
     }
      
     public void muestraContenido(String archivo) throws FileNotFoundException, IOException {
@@ -278,6 +318,47 @@ public class Nucleo {
     public int[] obtenerRegistros(){
         return registros;
     }
+    
+    public Boolean obtenerEstado(){
+        return listo;
+    }
+    
+    public void recibirProceso(BCP proceso) throws InterruptedException{
+        if(procesoEjecutando==null){
+            // Cargar proceso
+            establecerContexto(proceso);
+            //Operaciones("");
+            ejecutar1=true;
+        }else if(procesoEjecutando.obtenerNumeroProceso()==proceso.obtenerNumeroProceso()){
+            //Operaciones("");
+            ejecutar1=true;
+        }else{
+            cambioContexto(proceso);
+            ejecutar1=true;
+        }
+    }
+    
+    private void guardarContexto(){
+        procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC);
+    }
+    
+    private void establecerContexto(BCP procesoEntrante){
+        int[] registrosProceso=procesoEntrante.obtenerRegistros();
+        registros[0]=registrosProceso[5];
+        registros[1]=registrosProceso[0];
+        registros[2]=registrosProceso[1];
+        registros[3]=registrosProceso[2];
+        registros[4]=registrosProceso[3];
+        IR=registrosProceso[4];
+        PC=registrosProceso[5];
+        procesoEjecutando=procesoEntrante;
+    }
+    
+    private void cambioContexto(BCP procesoEntrante){
+        guardarContexto();
+        establecerContexto(procesoEntrante);
+    }
+    
     
     /*public static void limpiarClase(){
         arregloRegistros = new int[]{0,0,0,0,0};
