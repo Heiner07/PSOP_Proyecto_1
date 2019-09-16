@@ -43,7 +43,14 @@ public class CPU {
         this.colaTrabajoN2 = new ArrayList<>();
         this.procesos = new ArrayList<>();
         this.idProceso = 0;
+        inicializaMemoria();
         configuararHilos();
+    }
+    
+    private void inicializaMemoria(){
+        for(int i=0;i<CPU.LARGOMEMORIA;i++){
+            CPU.memoria[i] = "0000 0000 00000000";
+        }
     }
     
     /**
@@ -82,7 +89,7 @@ public class CPU {
         }
         if(nucleo2.obtenerEstado()){
             if(colaTrabajoN2.size()>0){
-                nucleo1.recibirProceso(obtenerBCP(colaTrabajoN2.remove(0).numeroBCP));
+                nucleo2.recibirProceso(obtenerBCP(colaTrabajoN2.remove(0).numeroBCP));
             }
         }
     }
@@ -158,10 +165,9 @@ public class CPU {
             estadoProceso=BCP.EN_ESPERA;
         }else{
             // Si hay espacio, entonces sí se cargar las instrucciones en memoria.
-            // Funcion cargarInstrucciones en memoria (Pendiente).
             cargarInstrucciones(finInicioMemoria[0],finInicioMemoria[1],instrucciones);
+            estadoProceso=BCP.PREPARADO;
             agregarProcesoCola(nucleo, numeroInstrucciones);
-            estadoProceso=BCP.NUEVO;
         }
         BCP proceso=new BCP(estadoProceso, idProceso++, 0, finInicioMemoria[0], finInicioMemoria[1], nucleo);
         procesos.add(proceso);
@@ -170,32 +176,33 @@ public class CPU {
     private void cargarInstrucciones(int inicioMemoria, int finMemoria, List<String> instrucciones){
         String[] parteOperacion,parteResto;
         String instruccionEnbits;
+        // Utilizo inicio de memoria como mi indice para moverme en la memoria, por eso lo aumento
         for(int i=0; inicioMemoria<=finMemoria; inicioMemoria++,i++){
             parteOperacion = instrucciones.get(i).split(" ");
             instruccionEnbits = parteOperacion[0];
             if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
                  if(parteOperacion.length == 2){ 
-                    CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
+                    CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
                  }else{
-                    CPU.memoria[i] = toBinario(instruccionEnbits)+" "+"0000"+" 00000000";
+                    CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+"0000"+" 00000000";
                  }
                                  
             }else{
                 parteResto = parteOperacion[1].split(",");
                 if(parteResto.length >=2){
                     try{
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));                   
+                        CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));                   
                     }catch(Exception e){
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);    
+                        CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);    
                     }
 
                 }else{
                     //Verifico si es jum, je, jne
                     if("JUM".equals(instruccionEnbits) || "JE".equals(instruccionEnbits) || "JNE".equals(instruccionEnbits)){
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
+                        CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
                     
                     }else{
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
+                        CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
                     }
                     
                 }//SALE ELSE DENTRO              

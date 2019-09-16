@@ -26,7 +26,7 @@ public class BCP {
     private int numeroProceso;
     private int PC;
     private int AX, BX, CX, DX, IR, AC, direccionPila;
-    private int nucleo;
+    private int nucleo; // Se utiliza para un proceso en espera, así se sabe a que núcleo debe ir.
     Timer timer;
     int segundos;
     
@@ -51,10 +51,20 @@ public class BCP {
         this.timer=new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                segundos++;
+                contadorTiempoEjecucion();
             }
         });
         this.timer.start();
+    }
+    
+    /**
+     * Función llamada por el timer que controla el tiempo de ejecución del proceso.
+     * Solo aumenta el tiempo si el estado del proceso está en ejecución.
+     */
+    private void contadorTiempoEjecucion(){
+        if(this.estadoProceso==BCP.EN_EJECUCION){
+            segundos++;
+        }
     }
     
     public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC, int PC){
@@ -73,6 +83,10 @@ public class BCP {
     
     public int obtenerEstadoProceso(){
         return estadoProceso;
+    }
+    
+    public void establecerEstado(int estado){
+        this.estadoProceso=estado;
     }
     
     public int obtenerDireccionpila(){
@@ -99,6 +113,11 @@ public class BCP {
         return segundos;
     }
     
+    /**
+     * Recibe el estado del proceso como entero y devuelve la cadena(String) equivalente al estado recibido
+     * @param estadoProceso
+     * @return 
+     */
     public static String estadoProcesoCadena(int estadoProceso){
         String estadoProcesoCadena;
         if(estadoProceso==BCP.EN_EJECUCION){

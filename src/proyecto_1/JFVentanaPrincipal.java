@@ -28,7 +28,6 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     
     int paso;
     int posicionMemoria;
-    int instruccion;
     String rutaArchivo;
     Boolean archivoCargado;
     DefaultTableModel modeloTablaArchivos, modeloTablaMemoria, modeloTablaDisco;
@@ -39,6 +38,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     
     /* Hilos de control */
     Timer timerControlBCPs, timerControlNucleos, timerControlColaNucleos;
+    Timer timerControlMemoria;
     
     /**
      * Creates new form JFVentanaPrincipal
@@ -50,13 +50,13 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         configurarTablaDisco();
         this.modeloTablaColaN1 = (DefaultTableModel) jtColaN1.getModel();
         this.modeloTablaColaN2 = (DefaultTableModel) jtColaN2.getModel();
+        this.modeloTablaArchivos = (DefaultTableModel) jtArchivos.getModel();
         //configurarTabla();
-        configuararHilos();
         this.archivos=new ArrayList<>();
         this.BCPs=new ArrayList<>();
-        this.modeloTablaArchivos = (DefaultTableModel) jtArchivos.getModel();
         this.cpu=new CPU();
         this.archivoCargado=false;
+        configuararHilos();
         this.setLocationRelativeTo(null);
     }
     
@@ -118,7 +118,6 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     private void establecerValores(){
         this.paso=1;
         this.posicionMemoria=0;
-        this.instruccion=1;
     }
     
     /**
@@ -129,17 +128,49 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         configurarHiloBCPs();
         configurarHiloNucleos();
         configurarHiloColaNucleos();
+        configurarHiloMemoria();
     }
     
     /**
-     * Establece la funcion para el timer timerControlColaNucleos que se encargará de actualizar...
+     * Establece la función para el timer timerControlMemoria que se encargará de actualizar...
+     * ...los valores de la memoria en la interfaz gráfica.
+     */
+    private void configurarHiloMemoria(){
+        timerControlMemoria = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                // Función que repetirá segun el intervalo asignado (1 segundo).
+                controlGraficoMemoria();
+            }
+        });
+        // Inicializo el timer.
+        timerControlMemoria.start();
+    }
+    
+    /**
+     * Controla los valores de la memoria que se muestran en la interfaz gráfica.
+     * Carga los valores de memoria y actualiza los valores en la interfaz gráfica.
+     * Este método es invocado por el timer timerControlMemoria.
+     */
+    private void controlGraficoMemoria(){
+        String[] instruccion;
+        for(int i=0;i<CPU.LARGOMEMORIA;i++){
+            instruccion = CPU.memoria[i].split(" ");
+            modeloTablaMemoria.setValueAt(instruccion[0], i, 1);
+            modeloTablaMemoria.setValueAt(instruccion[1], i, 2);
+            modeloTablaMemoria.setValueAt(instruccion[2], i, 3);
+        }
+    }
+    
+    /**
+     * Establece la función para el timer timerControlColaNucleos que se encargará de actualizar...
      * ...los valores en la interfaz gráfica.
      */
     private void configurarHiloColaNucleos(){
         timerControlColaNucleos = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                // Funcion que repetirá segun el intervalo asignado (1 segundo).
+                // Función que repetirá segun el intervalo asignado (1 segundo).
                 controlGraficoColaNucleos();
             }
         });
@@ -180,14 +211,14 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     }
     
     /**
-     * Establece la funcion para el timer timerControlNucleos que se encargará de actualizar...
+     * Establece la función para el timer timerControlNucleos que se encargará de actualizar...
      * ...los valores de los Núcleos en la interfaz gráfica.
      */
     private void configurarHiloNucleos(){
         timerControlNucleos = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                // Funcion que repetirá segun el intervalo asignado (1 segundo).
+                // Función que repetirá según el intervalo asignado (1 segundo).
                 controlGraficoNucleos();
             }
         });
@@ -230,14 +261,14 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     }
     
     /**
-     * Establece la funcion para el timer timerControlBCPs que se encargará de actualizar...
+     * Establece la función para el timer timerControlBCPs que se encargará de actualizar...
      * ...los valores de los BCPs en la interfaz gráfica.
      */
     private void configurarHiloBCPs(){
         timerControlBCPs = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                // Funcion que repetirá segun el intervalo asignado (1 segundo).
+                // Función que repetirá según el intervalo asignado (1 segundo).
                 controlGraficoBCPs();
             }
         });
@@ -1086,7 +1117,6 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane5)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1096,7 +1126,8 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 764, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 

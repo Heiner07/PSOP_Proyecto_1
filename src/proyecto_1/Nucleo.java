@@ -7,10 +7,6 @@ package proyecto_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
@@ -27,38 +23,45 @@ public class Nucleo {
     //[3] = CX
     //[4] = DX
     private int[] registros = {0,0,0,0,0};
-    static String[] memoria = new String[100];
     private int PC=0, IR=0;
     private BCP procesoEjecutando=null;
-    static int numeroInstrucciones=0;
-    static boolean ejecutar = false;
-    private Boolean listo = true; // Indica si está listo para ejecutar otra instrucción.
-    private Boolean ejecutar1 = false;
+    private Boolean ejecutar = false;
     private Timer timerOperacion;
+    private int tiempoRestante=0; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
     
     public Nucleo(){
         timerOperacion = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                try {
-                    // Función que repetirá según el intervalo asignado (1 segundo).
-                    if(ejecutar1){
-                        ejecutar1=false;
-                        Operaciones("");
-                        
-                    }
-                } catch (InterruptedException ex) {
-                    // Modificar para mostrar mensaje correspondiente
-                    Logger.getLogger(Nucleo.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                controlEjecucionNucleo();
             }
         });
         // Inicializo el timer.
         timerOperacion.start();
     }
     
-    public void Operaciones(String instrucciones2) throws InterruptedException{
-        listo=false;
+    /**
+     * Función llamada por el timerOperación que controla la ejecución de las operaciones en el núcleo.
+     * Si el tiempo es cero entonces verifica que hay una instrucción a ejecutar y la realiza, sino resta el tiempo...
+     * ...requerido de la operación anterior.
+     */
+    private void controlEjecucionNucleo(){
+        try {
+            if(tiempoRestante==0){
+                if(ejecutar){
+                    ejecutar=false;
+                    Operaciones();
+                }
+            }else{
+                tiempoRestante--;
+            }
+        } catch (InterruptedException ex) {
+            // Modificar para mostrar mensaje correspondiente
+            Logger.getLogger(Nucleo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void Operaciones() throws InterruptedException{
         // Asigno el IR
         IR=PC;
         // Traigo la instrucción de memoria y aumento el PC
@@ -70,28 +73,28 @@ public class Nucleo {
         String numeroORegistro = parts[2];        
         switch(operacion) {
             case "0001"://LOAD
-                registros[0] = registros[registroPosicion(registro)]; 
-                Thread.sleep(TiempoInstrucciones.LOAD*1000);
+                registros[0] = registros[registroPosicion(registro)];
+                tiempoRestante=TiempoInstrucciones.LOAD;
                 break;    
                 
             case "0010"://STORE
                 registros[registroPosicion(registro)] = registros[0];
-                Thread.sleep(TiempoInstrucciones.STORE*1000);
+                tiempoRestante=TiempoInstrucciones.STORE;
                 break;
                 
             case "0011"://MOV
                movimiento(registro,numeroORegistro);
-               Thread.sleep(TiempoInstrucciones.MOV*1000);
+               tiempoRestante=TiempoInstrucciones.MOV;
                break; 
                 
             case "0100"://SUB
                 restar(registro,numeroORegistro);
-                Thread.sleep(TiempoInstrucciones.SUB*1000);
+                tiempoRestante=TiempoInstrucciones.SUB;
                 break;
                 
             case "0101"://ADD
                 sumar(registro, numeroORegistro);
-                Thread.sleep(TiempoInstrucciones.ADD*1000);
+                tiempoRestante=TiempoInstrucciones.ADD;
                 break;
             case "0110"://INC               
                 break;
@@ -111,69 +114,9 @@ public class Nucleo {
                 break;          
             default:             
                 break;
-        }listo=true;
-    }
-     
-    public void muestraContenido(String archivo) throws FileNotFoundException, IOException {
-        String cadena;
-        String cadena2 ="";
-        
-        FileReader f = new FileReader(archivo);
-        try (BufferedReader b = new BufferedReader(f)) {
-            while((cadena = b.readLine())!=null) {
-                cadena2 += cadena +"\n";               
-            }
         }
-        String[] cadenaTemp=cadena2.split("\n");
-        numeroInstrucciones=cadenaTemp.length;
-        PC=(int) (Math.random() * 80);
-        //System.out.println("Posicion de memoria: "+posicionMemoria);
-        int posicionMemoriaTemp=PC;
-        for(int i=0; i<numeroInstrucciones && posicionMemoriaTemp<memoria.length; posicionMemoriaTemp++,i++){
-            memoria[posicionMemoriaTemp]=cadenaTemp[i];
-        }
-        memoriaToBits();
+        guardarContexto(); // Guarda el estado en el proceso. (Para que sea reflejado en la interfaz).
     }
-    
-    public void memoriaToBits(){
-        String[] parteOperacion,parteResto;
-        String instruccionEnbits;
-        int largo=PC+numeroInstrucciones;
-        for(int i=PC;i<largo;i++){
-            parteOperacion = memoria[i].split(" ");
-            instruccionEnbits = parteOperacion[0];
-            if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
-                 if(parteOperacion.length == 2){
-                     
-                     memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
-                 
-                 }else{
-                    memoria[i] = toBinario(instruccionEnbits)+" "+"0000"+" 00000000";                  
-                 }
-                                 
-            }else{
-                parteResto = parteOperacion[1].split(",");
-                if(parteResto.length >=2){
-                    try{
-                        memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));                   
-                    }catch(Exception e){
-                        memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);    
-                    }
-
-                }else{
-                    //Verifico si es jum, je, jne
-                    if("JUM".equals(instruccionEnbits) || "JE".equals(instruccionEnbits) || "JNE".equals(instruccionEnbits)){
-                        memoria[i] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
-                    
-                    }else{
-                        memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
-                    }
-                    
-                }//SALE ELSE DENTRO              
-            }//SALE ELSE
-            System.out.println(memoria[i]);
-        }//FOR
-    }//FUNCION
     
     public static int registroPosicion(String registro){       
         switch(registro) {
@@ -189,56 +132,6 @@ public class Nucleo {
                 return 0;  
         }
     }
-    
-    public String toBinario(String registro){      
-        switch(registro) {
-            case "AX"://AX                    
-                 return "0001";
-            case "BX"://BX
-                return "0010";                                  
-            case "CX"://CX
-                return "0011";
-            case "DX"://DX
-               return "0100";
-               
-               
-            case "LOAD"://LOAD
-               return "0001";
-            case "STORE"://STORE
-               return "0010";
-            case "MOV"://MOV
-               return "0011";
-            case "SUB"://SUB
-               return "0100";                
-            case "ADD"://ADD
-               return "0101"; 
-            case "INC"://INC    
-                return "0110";
-            case "DEC"://DEC
-                return "0111";
-            case "INT"://INT
-                return "1000";
-            case "JUM"://JUM [+/-Desplazamiento]
-                return "1001";
-            case "CMP"://CMP Val1,Val2
-                return "1010";
-            case "JE"://JE [ +/-Desplazamiento]
-                return "1011";
-            case "JNE"://JNE [ +/-Desplazamiento]
-                return "1100";
-            case "POP"://POP AX
-                return "1101";                
-            case "20H":
-                return "0101";
-            case "16H":
-                return "0110";
-            case "05H":
-                return "0111";               
-            default:
-                return "0000";
-        }    
-    }
-    
     
     public void movimiento(String registro, String numero){
         int numeroDecimal;
@@ -320,28 +213,50 @@ public class Nucleo {
     }
     
     public Boolean obtenerEstado(){
-        return listo;
+        return (tiempoRestante==0);// Si es igual a cero entonces está listo.
     }
     
+    /**
+     * Recibe el proceso de la cola de trabajo. Y lo pone a ejecutar.
+     * @param proceso
+     * @throws InterruptedException 
+     */
     public void recibirProceso(BCP proceso) throws InterruptedException{
         if(procesoEjecutando==null){
-            // Cargar proceso
+            // Si no hay proceso asignado, entonces solo se establece el entrante.
             establecerContexto(proceso);
-            //Operaciones("");
-            ejecutar1=true;
+            ejecutar=true;
         }else if(procesoEjecutando.obtenerNumeroProceso()==proceso.obtenerNumeroProceso()){
-            //Operaciones("");
-            ejecutar1=true;
+            // Si es el mismo proceso, solo indico que ejecute la siguiente instrucción
+            ejecutar=true;
         }else{
+            // Si es otro proceso diferente, entonces ejecuto un cambio de contexto.
             cambioContexto(proceso);
-            ejecutar1=true;
+            ejecutar=true;
         }
     }
     
+    /**
+     * Guarda el contexto que tiene el núcleo en el procesos que está ejecutando.
+     * Esta función se llama para el cambio de contexto y cada vez que termina Operaciones (Para reflejar los cambios en la interfaz)
+     */
     private void guardarContexto(){
+        if(PC>procesoEjecutando.obtenerFinMemoria()){
+            // Si el pc supera al fin de memoria, entonces se llegó a la última instrucción
+            procesoEjecutando.establecerEstado(BCP.TERMINADO);
+        }// Esto comentado creo solo sería si se implementa multiples procesos al mismo tiempo para un núcleo
+        /*else{
+            // Si no es el último, entonces se establece en preparado
+            procesoEjecutando.establecerEstado(BCP.PREPARADO);
+        }*/
         procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC);
     }
     
+    /**
+     * Establece el contexto, del proceso entrante, en el núcleo.
+     * Esta función se llama para el cambio de contexto.
+     * @param procesoEntrante 
+     */
     private void establecerContexto(BCP procesoEntrante){
         int[] registrosProceso=procesoEntrante.obtenerRegistros();
         registros[0]=registrosProceso[5];
@@ -350,21 +265,19 @@ public class Nucleo {
         registros[3]=registrosProceso[2];
         registros[4]=registrosProceso[3];
         IR=registrosProceso[4];
-        PC=registrosProceso[5];
+        PC=registrosProceso[6];
         procesoEjecutando=procesoEntrante;
+        procesoEjecutando.establecerEstado(BCP.EN_EJECUCION);
     }
     
+    /**
+     * Guarda el contexto (información de la ejecución) del procesos actual(ejeuctandose) y carga...
+     * ...el contexto del proceso entrante para realizar las operaciones.
+     * @param procesoEntrante 
+     */
     private void cambioContexto(BCP procesoEntrante){
         guardarContexto();
         establecerContexto(procesoEntrante);
     }
     
-    
-    /*public static void limpiarClase(){
-        arregloRegistros = new int[]{0,0,0,0,0};
-        memoria = new String[100];
-        posicionMemoria=0;
-        numeroInstrucciones=0;
-        ejecutar = false;
-    }*/
 }
