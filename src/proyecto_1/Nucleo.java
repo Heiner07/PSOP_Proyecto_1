@@ -7,13 +7,10 @@ package proyecto_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
-import javax.swing.WindowConstants;
 
 /**
  *
@@ -28,12 +25,11 @@ public class Nucleo {
     //[4] = DX
     private int[] registros = {0,0,0,0,0};
     private int PC=0, IR=0;
+    private String instruccionIR="";
     private BCP procesoEjecutando=null;
     static int numeroInstrucciones=0;
-    static boolean ejecutar = false;
     private boolean bandera= false;
-    private Boolean listo = true; // Indica si está listo para ejecutar otra instrucción.
-    private Boolean ejecutar1 = false;
+    private Boolean ejecutar = false;
     private Timer timerOperacion;
     private int tiempoRestante=0; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
     private Stack < String > parametros = new Stack <> ();
@@ -72,6 +68,8 @@ public class Nucleo {
     private void Operaciones() throws InterruptedException{
         // Asigno el IR
         IR=PC;
+        instruccionIR=CPU.memoria[IR];
+        procesoEjecutando.establecerCadenaInstruccionIR(instruccionIR);
         // Traigo la instrucción de memoria y aumento el PC
 
         String instrucciones = CPU.memoria[PC++];
@@ -282,6 +280,10 @@ public class Nucleo {
     
     public int obtenerIR(){
         return IR;
+    }
+    
+    public String obtenerCadenaInstruccionIR(){
+        return instruccionIR;
     }
     
     public int[] obtenerRegistros(){

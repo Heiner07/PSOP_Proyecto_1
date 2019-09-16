@@ -7,7 +7,6 @@ package proyecto_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 import java.util.Stack;
 import javax.swing.Timer;
 
@@ -29,8 +28,9 @@ public class BCP {
     private int PC;
     private int AX, BX, CX, DX, IR, AC, direccionPila;
     private int nucleo; // Se utiliza para un proceso en espera, así se sabe a que núcleo debe ir.
-    Timer timer;
-    int segundos;
+    private Timer timer;
+    private int segundos;
+    private String instruccionIR;
     private Stack < String > parametros = new Stack <> ();
     //Limites de memoria
     private int inicioMemoria, finMemoria;
@@ -42,6 +42,7 @@ public class BCP {
         this.DX=0;
         this.IR=0;
         this.AC=0;
+        this.instruccionIR="";
         this.estadoProceso=estadoProceso;
         this.numeroProceso=numeroProceso;
         this.direccionPila=0;
@@ -119,6 +120,14 @@ public class BCP {
     
     public int obtenerTiempoEjecucion(){
         return segundos;
+    }
+    
+    public void establecerCadenaInstruccionIR(String instruccion){
+        instruccionIR=instruccion;
+    }
+    
+    public String obtenerCadenaInstruccionIR(){
+        return instruccionIR;
     }
     
     /**

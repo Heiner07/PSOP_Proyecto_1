@@ -22,7 +22,7 @@ public class JPBCP extends javax.swing.JPanel {
      * @param registros
      */
     public JPBCP(int numeroProceso, int estadoProceso, int direccionPila,
-            int inicioMemoria, int finMemoria, int tiempoEjecucion, int[] registros) {
+            int inicioMemoria, int finMemoria, int tiempoEjecucion, String IR, int[] registros) {
         initComponents();
         this.lbNumeroProceso.setText(String.valueOf(numeroProceso));
         this.lbEstadoProceso.setText(BCP.estadoProcesoCadena(estadoProceso));
@@ -30,6 +30,7 @@ public class JPBCP extends javax.swing.JPanel {
         this.lbInicioMemoria.setText(String.valueOf(inicioMemoria));
         this.lbFinMemoria.setText(String.valueOf(finMemoria));
         this.lbTiempoEjecucion.setText(String.valueOf(tiempoEjecucion));
+        this.lbIR.setText(IR);
         establecerRegistros(registros);
     }
     
@@ -46,7 +47,7 @@ public class JPBCP extends javax.swing.JPanel {
         lbBX.setText(String.valueOf(registros[1]));
         lbCX.setText(String.valueOf(registros[2]));
         lbDX.setText(String.valueOf(registros[3]));
-        lbIR.setText(String.valueOf(registros[4]));
+        //registros[4] es el IR en int, en el constructor se asigna como cadena;
         lbAC.setText(String.valueOf(registros[5]));
         lbPC.setText(String.valueOf(registros[6]));
     }

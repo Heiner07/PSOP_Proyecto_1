@@ -237,7 +237,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         // Establezco los valores del núcleo 1
         int[] registrosN1=n1.obtenerRegistros(); // Obtengo los registros del núcleo 1.
         lbPCN1.setText(String.valueOf(n1.obtenerPC()));
-        lbIRN1.setText(String.valueOf(n1.obtenerIR()));
+        lbIRN1.setText(String.valueOf(n1.obtenerCadenaInstruccionIR()));
         lbACN1.setText(String.valueOf(registrosN1[0]));
         lbAXN1.setText(String.valueOf(registrosN1[1]));
         lbBXN1.setText(String.valueOf(registrosN1[2]));
@@ -247,7 +247,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         // Establezco los valores del núcleo 2
         int[] registrosN2=n2.obtenerRegistros(); // Obtengo los registros del núcleo 2.
         lbPCN2.setText(String.valueOf(n2.obtenerPC()));
-        lbIRN2.setText(String.valueOf(n2.obtenerIR()));
+        lbIRN2.setText(String.valueOf(n2.obtenerCadenaInstruccionIR()));
         lbACN2.setText(String.valueOf(registrosN2[0]));
         lbAXN2.setText(String.valueOf(registrosN2[1]));
         lbBXN2.setText(String.valueOf(registrosN2[2]));
@@ -293,7 +293,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             // Creo el nuevo BCP gráfico.
             procesoInterfaz=new JPBCP(proceso.obtenerNumeroProceso(), proceso.obtenerEstadoProceso(),
                     proceso.obtenerDireccionpila(), proceso.obtenerInicioMemoria(), proceso.obtenerFinMemoria(),
-                    proceso.obtenerTiempoEjecucion(), proceso.obtenerRegistros());
+                    proceso.obtenerTiempoEjecucion(), proceso.obtenerCadenaInstruccionIR(), proceso.obtenerRegistros());
             panelBCPs.add(procesoInterfaz); // Agrego el nuevo BCP gráfico al panel de BCPs
             BCPs.add(procesoInterfaz); // Agrego el nuevo BCP gráfico a la lista de control
         }// Actualizo el panel de BCPs

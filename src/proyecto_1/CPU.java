@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import static java.util.Collections.reverse;
 import java.util.List;
 import java.util.Stack;
@@ -181,8 +180,10 @@ public class CPU {
         //if(tieneParametros)numeroInstrucciones-=1;
         
         int[] finInicioMemoria=determinarPosicionesMemoria(numeroInstrucciones);
+        int idProcesoNuevo=this.idProceso++;
         int estadoProceso;
         int nucleo = (int) (Math.random() * 2); // Se determina el núcleo donde se ejecutará el proceso.
+        Boolean agregarACola=false; // Me indica si agrego el proceso a una cola.
         if(finInicioMemoria[0]==-1){
             // Si no hay espacio, entonces no se cargan las instrucciones en memoria.
             estadoProceso=BCP.EN_ESPERA;
@@ -190,11 +191,16 @@ public class CPU {
             // Si hay espacio, entonces sí se cargar las instrucciones en memoria.
             cargarInstrucciones(finInicioMemoria[0],finInicioMemoria[1],instrucciones);
             estadoProceso=BCP.PREPARADO;
-            agregarProcesoCola(nucleo, numeroInstrucciones);
+            agregarACola=true; // Indica que se agregue el proceso a la cola.
         }
         reverse(pila);
-        BCP proceso=new BCP(estadoProceso, idProceso++, 0, finInicioMemoria[0], finInicioMemoria[1], nucleo,pila);
+        BCP proceso=new BCP(estadoProceso, idProcesoNuevo, 0, finInicioMemoria[0], finInicioMemoria[1], nucleo,pila);
         procesos.add(proceso);
+        if(agregarACola){
+            // Lo agrego aquí para que sea agregado a la cola después de agregar el proceso a la lista de procesos...
+            // ...para que no genere conflicto (muy poco probable) con los hilos.
+            agregarProcesoCola(nucleo,idProcesoNuevo, numeroInstrucciones);
+        }
     }
     
     private void cargarInstrucciones(int inicioMemoria, int finMemoria, List<String> instrucciones){
@@ -209,39 +215,25 @@ public class CPU {
             instruccionEnbits = parteOperacion[0];
             
             if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
-                 if(parteOperacion.length == 2){ 
-
-                    CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
-                    
-
+                 if(parteOperacion.length == 2){
                     CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
-
                  }else{
                     CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+"0000"+" 00000000";
                  }
-                                 
             }else{
                 parteResto = parteOperacion[1].split(",");
                 if(parteResto.length >=2){
                     try{
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));  
-                       
                         CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));                   
                     }catch(Exception e){
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);
-                       
                         CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);    
                     }
 
                 }else{
                     //Verifico si es jum, je, jne
                     if("JUM".equals(instruccionEnbits) || "JE".equals(instruccionEnbits) || "JNE".equals(instruccionEnbits)){
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
                         CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
-                    
                     }else{
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";     
-
                         CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
                     }
                     
@@ -313,16 +305,16 @@ public class CPU {
         return temp;
     }
     
-    private void agregarProcesoCola(int nucleo, int numeroInstrucciones){
+    private void agregarProcesoCola(int nucleo, int idProcesoNuevo, int numeroInstrucciones){
         Trabajo trabajo;
         if(nucleo==0){
             for(int i=0;i<numeroInstrucciones;i++){
-                trabajo=new Trabajo(0, idProceso);
+                trabajo=new Trabajo(0, idProcesoNuevo);
                 colaTrabajoN1.add(trabajo);
             }
         }else{
             for(int i=0;i<numeroInstrucciones;i++){
-                trabajo=new Trabajo(1, idProceso);
+                trabajo=new Trabajo(1, idProcesoNuevo);
                 colaTrabajoN2.add(trabajo);
             }
         }
