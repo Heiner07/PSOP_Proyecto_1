@@ -13,7 +13,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import static java.util.Collections.reverse;
 import java.util.List;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
@@ -34,7 +36,7 @@ public class CPU {
     private List<BCP> procesos;
     private int idProceso;
     private String[] parametros;
-    private boolean tieneParametros = false;
+
     /* Hilos de Control */
     private Timer timerControlColasNucleos;
     
@@ -146,18 +148,11 @@ public class CPU {
         int cantidadArchivos=archivos.size();
         List<String> erroresLectura = new ArrayList<>(); // Almacena los archivos donde ocurrió un error;
         List<String> instrucciones;
-        String[] obtenerParametros;
+        
         for(int i=0;i<cantidadArchivos;i++){
             try {
                 instrucciones=obtenerIntruccionesArchivo(archivos.get(i));
-                
-                obtenerParametros = instrucciones.get(i).split(" ");
-                if(obtenerParametros[0].equals("PARAM")){              
-                    parametros = obtenerParametros[1].split(",");  
-                    tieneParametros = true;
-                    instrucciones.remove(i);
-                }
-                System.out.println(i + " -> "+Arrays.toString(parametros));
+                              
                 crearProceso(instrucciones);
             } catch (IOException ex) {
                 erroresLectura.add(archivos.get(i));
@@ -171,6 +166,17 @@ public class CPU {
      * @param instrucciones 
      */
     public void crearProceso(List<String> instrucciones){
+        String[] obtenerParametros;
+        Stack < String > pila = new Stack <> ();
+       
+        obtenerParametros = instrucciones.get(0).split(" ");
+        if(obtenerParametros[0].equals("PARAM")){              
+            parametros = obtenerParametros[1].split(",");  
+            for (String parametro : parametros) {
+                pila.push(parametro);
+            }
+            instrucciones.remove(0);
+        }
         int numeroInstrucciones=instrucciones.size();
         //if(tieneParametros)numeroInstrucciones-=1;
         
@@ -186,7 +192,8 @@ public class CPU {
             estadoProceso=BCP.PREPARADO;
             agregarProcesoCola(nucleo, numeroInstrucciones);
         }
-        BCP proceso=new BCP(estadoProceso, idProceso++, 0, finInicioMemoria[0], finInicioMemoria[1], nucleo);
+        reverse(pila);
+        BCP proceso=new BCP(estadoProceso, idProceso++, 0, finInicioMemoria[0], finInicioMemoria[1], nucleo,pila);
         procesos.add(proceso);
     }
     

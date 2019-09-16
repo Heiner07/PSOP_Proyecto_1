@@ -137,12 +137,9 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
      * ...los valores de la memoria en la interfaz gráfica.
      */
     private void configurarHiloMemoria(){
-        timerControlMemoria = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                // Función que repetirá segun el intervalo asignado (1 segundo).
-                controlGraficoMemoria();
-            }
+        timerControlMemoria = new Timer(1000, (ActionEvent ae) -> {
+            // Función que repetirá segun el intervalo asignado (1 segundo).
+            controlGraficoMemoria();
         });
         // Inicializo el timer.
         timerControlMemoria.start();

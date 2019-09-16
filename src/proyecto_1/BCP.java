@@ -7,6 +7,8 @@ package proyecto_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.Stack;
 import javax.swing.Timer;
 
 /**
@@ -29,11 +31,11 @@ public class BCP {
     private int nucleo; // Se utiliza para un proceso en espera, así se sabe a que núcleo debe ir.
     Timer timer;
     int segundos;
-    
+    private Stack < String > parametros = new Stack <> ();
     //Limites de memoria
     private int inicioMemoria, finMemoria;
     
-    public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria, int nucleo){
+    public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria, int nucleo,Stack<String> parametros ){
         this.AX=0;
         this.BX=0;
         this.CX=0;
@@ -48,6 +50,7 @@ public class BCP {
         this.PC=inicioMemoria;
         this.nucleo=nucleo;
         this.segundos=0;
+        this.parametros = parametros;
         this.timer=new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -67,7 +70,7 @@ public class BCP {
         }
     }
     
-    public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC, int PC){
+    public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC, int PC,Stack<String> parametros ){
         this.AX=AX;
         this.BX=BX;
         this.CX=CX;
@@ -75,12 +78,17 @@ public class BCP {
         this.IR=IR;
         this.AC=AC;
         this.PC=PC;
+        this.parametros = parametros;
     }
     
     public int obtenerNumeroProceso(){
         return numeroProceso;
     }
+    public Stack <String> obtenerParametros(){
+        return parametros;
     
+    }
+   
     public int obtenerEstadoProceso(){
         return estadoProceso;
     }

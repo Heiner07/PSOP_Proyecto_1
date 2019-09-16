@@ -7,6 +7,9 @@ package proyecto_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
@@ -33,7 +36,7 @@ public class Nucleo {
     private Boolean ejecutar1 = false;
     private Timer timerOperacion;
     private int tiempoRestante=0; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
-    
+    private Stack < String > parametros = new Stack <> ();
     public Nucleo(){
         timerOperacion = new Timer(1000, new ActionListener() {
             @Override
@@ -70,8 +73,9 @@ public class Nucleo {
         // Asigno el IR
         IR=PC;
         // Traigo la instrucción de memoria y aumento el PC
-       
+
         String instrucciones = CPU.memoria[PC++];
+
         String[] parts;
         parts = instrucciones.split(" ");
         String operacion = parts[0];
@@ -147,8 +151,8 @@ public class Nucleo {
                 tiempoRestante=TiempoInstrucciones.JEJNE;
                 break;
             case "1101"://POP AX
-                
-                
+                popRegistro(registro);
+                tiempoRestante=TiempoInstrucciones.POP;
                 break;          
             default:             
                 break;
@@ -249,7 +253,14 @@ public class Nucleo {
         bandera = numeroDecimal1 == numeroDecimal2;
     }
     
+    public void popRegistro(String registro){
+//        System.out.println(Arrays.toString(parametros.toArray()));
+        if(!parametros.empty()){
+            registros[(registroPosicion(registro))] = Integer.parseInt(parametros.pop());      
+        }
     
+    
+    }
     public String decimalABinaro(int a) {
         boolean negativo = false;
         if(a<0){
@@ -314,7 +325,7 @@ public class Nucleo {
             // Si no es el último, entonces se establece en preparado
             procesoEjecutando.establecerEstado(BCP.PREPARADO);
         }*/
-        procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC);
+        procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC,parametros);
     }
     
     /**
@@ -324,6 +335,7 @@ public class Nucleo {
      */
     private void establecerContexto(BCP procesoEntrante){
         int[] registrosProceso=procesoEntrante.obtenerRegistros();
+        parametros = procesoEntrante.obtenerParametros();
         registros[0]=registrosProceso[5];
         registros[1]=registrosProceso[0];
         registros[2]=registrosProceso[1];
@@ -331,6 +343,7 @@ public class Nucleo {
         registros[4]=registrosProceso[3];
         IR=registrosProceso[4];
         PC=registrosProceso[6];
+       
         procesoEjecutando=procesoEntrante;
         procesoEjecutando.establecerEstado(BCP.EN_EJECUCION);
     }
