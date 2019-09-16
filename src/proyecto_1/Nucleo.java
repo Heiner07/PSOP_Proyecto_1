@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
+import javax.swing.WindowConstants;
 
 /**
  *
@@ -32,10 +33,11 @@ public class Nucleo {
     private BCP procesoEjecutando=null;
     static int numeroInstrucciones=0;
     static boolean ejecutar = false;
+    private boolean bandera= false;
     private Boolean listo = true; // Indica si está listo para ejecutar otra instrucción.
     private Boolean ejecutar1 = false;
     private Timer timerOperacion;
-    
+    private String[] parametros2;
     public Nucleo(){
         timerOperacion = new Timer(1000, new ActionListener() {
             @Override
@@ -62,12 +64,14 @@ public class Nucleo {
         // Asigno el IR
         IR=PC;
         // Traigo la instrucción de memoria y aumento el PC
+       
         String instrucciones = CPU.memoria[PC++];
         String[] parts;
         parts = instrucciones.split(" ");
         String operacion = parts[0];
         String registro = parts[1];
-        String numeroORegistro = parts[2];        
+        String numeroORegistro = parts[2];    
+        
         switch(operacion) {
             case "0001"://LOAD
                 registros[0] = registros[registroPosicion(registro)]; 
@@ -93,88 +97,57 @@ public class Nucleo {
                 sumar(registro, numeroORegistro);
                 Thread.sleep(TiempoInstrucciones.ADD*1000);
                 break;
-            case "0110"://INC               
+            case "0110"://INC  
+                incrementar(registro);
+                Thread.sleep(TiempoInstrucciones.INC * 1000);
                 break;
             case "0111"://DEC
+                decrementar(registro);
+                Thread.sleep(TiempoInstrucciones.DEC * 1000);
                 break;
             case "1000"://INT 20H
+                
                 break;
-            case "1001"://JUM [+/-Desplazamiento]
+            case "1001"://JUMP [+/-Desplazamiento]
+                int decimal = Integer.parseInt(numeroORegistro.substring(1, 8),2);
+                if("1".equals(numeroORegistro.substring(0,1))){
+                    decimal *= -1;           
+                }              
+                PC += decimal;
+                Thread.sleep(TiempoInstrucciones.JUMP * 1000);
                 break;
             case "1010"://CMP Val1,Val2
+                compararValores(registro,numeroORegistro);
+                Thread.sleep(TiempoInstrucciones.CMP * 1000);
                 break;
             case "1011"://JE [ +/-Desplazamiento]
+                if(bandera){
+                    int decimal2 = Integer.parseInt(numeroORegistro.substring(1, 8),2);
+                    if("1".equals(numeroORegistro.substring(0,1))){
+                        decimal2 *= -1;           
+                    }              
+                    PC += decimal2;                   
+                }
+                Thread.sleep(TiempoInstrucciones.JEJNE * 1000);
                 break;
             case "1100"://JNE [ +/-Desplazamiento]
+                if(!bandera){
+                    int decimal3 = Integer.parseInt(numeroORegistro.substring(1, 8),2);
+                    if("1".equals(numeroORegistro.substring(0,1))){
+                        decimal3 *= -1;           
+                    }              
+                    PC += decimal3;                   
+                }
+                Thread.sleep(TiempoInstrucciones.JEJNE * 1000);
                 break;
             case "1101"://POP AX
+                
+                
                 break;          
             default:             
                 break;
         }listo=true;
     }
-     
-    public void muestraContenido(String archivo) throws FileNotFoundException, IOException {
-        String cadena;
-        String cadena2 ="";
-        
-        FileReader f = new FileReader(archivo);
-        try (BufferedReader b = new BufferedReader(f)) {
-            while((cadena = b.readLine())!=null) {
-                cadena2 += cadena +"\n";               
-            }
-        }
-        String[] cadenaTemp=cadena2.split("\n");
-        numeroInstrucciones=cadenaTemp.length;
-        PC=(int) (Math.random() * 80);
-        //System.out.println("Posicion de memoria: "+posicionMemoria);
-        int posicionMemoriaTemp=PC;
-        for(int i=0; i<numeroInstrucciones && posicionMemoriaTemp<memoria.length; posicionMemoriaTemp++,i++){
-            memoria[posicionMemoriaTemp]=cadenaTemp[i];
-        }
-        memoriaToBits();
-    }
-    
-    public void memoriaToBits(){
-        String[] parteOperacion,parteResto;
-        String instruccionEnbits;
-        int largo=PC+numeroInstrucciones;
-        for(int i=PC;i<largo;i++){
-            parteOperacion = memoria[i].split(" ");
-            instruccionEnbits = parteOperacion[0];
-            if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
-                 if(parteOperacion.length == 2){
-                     
-                     memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
-                 
-                 }else{
-                    memoria[i] = toBinario(instruccionEnbits)+" "+"0000"+" 00000000";                  
-                 }
-                                 
-            }else{
-                parteResto = parteOperacion[1].split(",");
-                if(parteResto.length >=2){
-                    try{
-                        memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));                   
-                    }catch(Exception e){
-                        memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);    
-                    }
-
-                }else{
-                    //Verifico si es jum, je, jne
-                    if("JUM".equals(instruccionEnbits) || "JE".equals(instruccionEnbits) || "JNE".equals(instruccionEnbits)){
-                        memoria[i] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
-                    
-                    }else{
-                        memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
-                    }
-                    
-                }//SALE ELSE DENTRO              
-            }//SALE ELSE
-            System.out.println(memoria[i]);
-        }//FOR
-    }//FUNCION
-    
     public static int registroPosicion(String registro){       
         switch(registro) {
             case "0001"://AX                    
@@ -190,54 +163,6 @@ public class Nucleo {
         }
     }
     
-    public String toBinario(String registro){      
-        switch(registro) {
-            case "AX"://AX                    
-                 return "0001";
-            case "BX"://BX
-                return "0010";                                  
-            case "CX"://CX
-                return "0011";
-            case "DX"://DX
-               return "0100";
-               
-               
-            case "LOAD"://LOAD
-               return "0001";
-            case "STORE"://STORE
-               return "0010";
-            case "MOV"://MOV
-               return "0011";
-            case "SUB"://SUB
-               return "0100";                
-            case "ADD"://ADD
-               return "0101"; 
-            case "INC"://INC    
-                return "0110";
-            case "DEC"://DEC
-                return "0111";
-            case "INT"://INT
-                return "1000";
-            case "JUM"://JUM [+/-Desplazamiento]
-                return "1001";
-            case "CMP"://CMP Val1,Val2
-                return "1010";
-            case "JE"://JE [ +/-Desplazamiento]
-                return "1011";
-            case "JNE"://JNE [ +/-Desplazamiento]
-                return "1100";
-            case "POP"://POP AX
-                return "1101";                
-            case "20H":
-                return "0101";
-            case "16H":
-                return "0110";
-            case "05H":
-                return "0111";               
-            default:
-                return "0000";
-        }    
-    }
     
     
     public void movimiento(String registro, String numero){
@@ -291,6 +216,31 @@ public class Nucleo {
             registros[registroPosicion(registro)] -= numeroDecimal;
         }
     }
+    
+    public void incrementar(String registro){
+        if(registro.equals("0000")){
+            registros[0] += 1;
+        }else{
+            registros[registroPosicion(registro)] += 1;
+            
+        }       
+    }
+    
+    public void decrementar(String registro){
+        if(registro.equals("0000")){
+            registros[0] -= 1;
+        }else{
+            registros[registroPosicion(registro)] -= 1;
+            
+        }       
+    }
+    
+    public void compararValores(String val1,String val2){
+        int numeroDecimal1 = registros[(registroPosicion(val1))];      
+        int numeroDecimal2 = registros[registroPosicion(val2.substring(5, 9))];
+        bandera = numeroDecimal1 == numeroDecimal2;
+    }
+    
     
     public String decimalABinaro(int a) {
         boolean negativo = false;

@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +33,8 @@ public class CPU {
     private List<Trabajo> colaTrabajoN1, colaTrabajoN2;
     private List<BCP> procesos;
     private int idProceso;
-    
+    private String[] parametros;
+    private boolean tieneParametros = false;
     /* Hilos de Control */
     private Timer timerControlColasNucleos;
     
@@ -87,6 +89,10 @@ public class CPU {
         }
     }
     
+    public String[] obtenerParametros(){
+        return parametros;
+    
+    }
     public Nucleo obtenerNucleo1(){
         return nucleo1;
     }
@@ -133,9 +139,18 @@ public class CPU {
         int cantidadArchivos=archivos.size();
         List<String> erroresLectura = new ArrayList<>(); // Almacena los archivos donde ocurrió un error;
         List<String> instrucciones;
+        String[] obtenerParametros;
         for(int i=0;i<cantidadArchivos;i++){
             try {
                 instrucciones=obtenerIntruccionesArchivo(archivos.get(i));
+                
+                obtenerParametros = instrucciones.get(i).split(" ");
+                if(obtenerParametros[0].equals("PARAM")){              
+                    parametros = obtenerParametros[1].split(",");  
+                    tieneParametros = true;
+                    instrucciones.remove(i);
+                }
+                System.out.println(i + " -> "+Arrays.toString(parametros));
                 crearProceso(instrucciones);
             } catch (IOException ex) {
                 erroresLectura.add(archivos.get(i));
@@ -150,6 +165,8 @@ public class CPU {
      */
     public void crearProceso(List<String> instrucciones){
         int numeroInstrucciones=instrucciones.size();
+        //if(tieneParametros)numeroInstrucciones-=1;
+        
         int[] finInicioMemoria=determinarPosicionesMemoria(numeroInstrucciones);
         int estadoProceso;
         int nucleo = (int) (Math.random() * 2); // Se determina el núcleo donde se ejecutará el proceso.
@@ -170,12 +187,15 @@ public class CPU {
     private void cargarInstrucciones(int inicioMemoria, int finMemoria, List<String> instrucciones){
         String[] parteOperacion,parteResto;
         String instruccionEnbits;
+        
         for(int i=0; inicioMemoria<=finMemoria; inicioMemoria++,i++){
             parteOperacion = instrucciones.get(i).split(" ");
             instruccionEnbits = parteOperacion[0];
+            
             if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
                  if(parteOperacion.length == 2){ 
                     CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
+                    
                  }else{
                     CPU.memoria[i] = toBinario(instruccionEnbits)+" "+"0000"+" 00000000";
                  }
@@ -184,18 +204,19 @@ public class CPU {
                 parteResto = parteOperacion[1].split(",");
                 if(parteResto.length >=2){
                     try{
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));                   
+                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));  
+                       
                     }catch(Exception e){
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);    
+                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);
+                       
                     }
 
                 }else{
                     //Verifico si es jum, je, jne
                     if("JUM".equals(instruccionEnbits) || "JE".equals(instruccionEnbits) || "JNE".equals(instruccionEnbits)){
                         CPU.memoria[i] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
-                    
                     }else{
-                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
+                        CPU.memoria[i] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";     
                     }
                     
                 }//SALE ELSE DENTRO              
@@ -291,6 +312,7 @@ public class CPU {
      * @return int[]
      */
     // Falta considerar que puede haber un solo bloque, pero no empieza en la posicion cero.
+    @SuppressWarnings("empty-statement")
     public int[] determinarPosicionesMemoria(int memoriaRequerida){
         int numeroProcesos = procesos.size();
         int inicioMemoria = -1, finMemoria = -1;
@@ -307,6 +329,7 @@ public class CPU {
                 if(proceso.obtenerFinMemoria()-finMemoriaTemp>=memoriaRequerida+1){
                     inicioMemoria=finMemoriaTemp+1;
                     finMemoria=proceso.obtenerFinMemoria()-1;
+                   
                     hayEspacio=true;
                     break;
                 }
@@ -348,6 +371,7 @@ public class CPU {
                 instrucciones.add(cadena);
             }
         }
+        
         return instrucciones;
     }
 }
