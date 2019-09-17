@@ -231,7 +231,7 @@ public class CPU {
 
                 }else{
                     //Verifico si es jum, je, jne
-                    if("JUM".equals(instruccionEnbits) || "JE".equals(instruccionEnbits) || "JNE".equals(instruccionEnbits)){
+                    if("JUMP".equals(instruccionEnbits) || "JE".equals(instruccionEnbits) || "JNE".equals(instruccionEnbits)){
                         CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
                     }else{
                         CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
@@ -269,7 +269,7 @@ public class CPU {
                 return "0111";
             case "INT"://INT
                 return "1000";
-            case "JUM"://JUM [+/-Desplazamiento]
+            case "JUMP"://JUM [+/-Desplazamiento]
                 return "1001";
             case "CMP"://CMP Val1,Val2
                 return "1010";

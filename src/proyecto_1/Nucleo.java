@@ -33,6 +33,7 @@ public class Nucleo {
     private Timer timerOperacion;
     private int tiempoRestante=0; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
     private Stack < String > parametros = new Stack <> ();
+    private int inicioMemoria, finMemoria;
     public Nucleo(){
         timerOperacion = new Timer(1000, new ActionListener() {
             @Override
@@ -79,7 +80,7 @@ public class Nucleo {
         String operacion = parts[0];
         String registro = parts[1];
         String numeroORegistro = parts[2];    
-        
+        System.out.println("operacion: "+operacion);
         switch(operacion) {
             case "0001"://LOAD
                 registros[0] = registros[registroPosicion(registro)];
@@ -120,7 +121,8 @@ public class Nucleo {
                 int decimal = Integer.parseInt(numeroORegistro.substring(1, 8),2);
                 if("1".equals(numeroORegistro.substring(0,1))){
                     decimal *= -1;           
-                }              
+                }   
+                PC -=1;
                 PC += decimal;
                 tiempoRestante=TiempoInstrucciones.JUMP;
                 break;
@@ -319,8 +321,13 @@ public class Nucleo {
      * Esta función se llama para el cambio de contexto y cada vez que termina Operaciones (Para reflejar los cambios en la interfaz)
      */
     private void guardarContexto(){
+        System.out.println("PC: "+PC+ " finMemoria: "+procesoEjecutando.obtenerFinMemoria());
         if(PC>procesoEjecutando.obtenerFinMemoria()){
             // Si el pc supera al fin de memoria, entonces se llegó a la última instrucción
+            for(int i=inicioMemoria;i<=finMemoria;i++){
+                CPU.memoria[i] = "0000 0000 00000000";
+            
+            }
             procesoEjecutando.establecerEstado(BCP.TERMINADO);
         }// Esto comentado creo solo sería si se implementa multiples procesos al mismo tiempo para un núcleo
         /*else{
@@ -345,7 +352,8 @@ public class Nucleo {
         registros[4]=registrosProceso[3];
         IR=registrosProceso[4];
         PC=registrosProceso[6];
-       
+        inicioMemoria = procesoEntrante.obtenerInicioMemoria();
+        finMemoria = procesoEntrante.obtenerFinMemoria();
         procesoEjecutando=procesoEntrante;
         procesoEjecutando.establecerEstado(BCP.EN_EJECUCION);
     }
