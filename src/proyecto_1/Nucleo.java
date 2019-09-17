@@ -70,11 +70,11 @@ public class Nucleo {
     private void Operaciones() throws InterruptedException{
         // Asigno el IR
         IR=PC;
-        instruccionIR=CPU.memoria[IR];
+        instruccionIR=CPU.memoriaVirtual[IR];
         procesoEjecutando.establecerCadenaInstruccionIR(instruccionIR);
         // Traigo la instrucción de memoria y aumento el PC
 
-        String instrucciones = CPU.memoria[PC++];
+        String instrucciones = CPU.memoriaVirtual[PC++];
 
         String[] parts;
         parts = instrucciones.split(" ");
@@ -126,6 +126,8 @@ public class Nucleo {
                 } 
                                     
 
+                            
+                
                 PC += decimal;
                 System.out.println("PC: "+PC+" Decimal: "+decimal);
 
@@ -339,7 +341,7 @@ public class Nucleo {
             procesoEjecutando.establecerEstado(BCP.TERMINADO);
             estadoProceso = false;
             for(int i=inicioMemoria;i<=finMemoria;i++){
-                CPU.memoria[i] = "0000 0000 00000000";
+                CPU.memoriaVirtual[i] = "0000 0000 00000000";
             
             }
             

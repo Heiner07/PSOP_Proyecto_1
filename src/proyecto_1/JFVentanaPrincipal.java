@@ -39,7 +39,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     
     /* Hilos de control */
     Timer timerControlBCPs, timerControlNucleos, timerControlColaNucleos;
-    Timer timerControlMemoria;
+    Timer timerControlMemoria, timerControlDisco;
     
     /**
      * Creates new form JFVentanaPrincipal
@@ -130,6 +130,35 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         configurarHiloNucleos();
         configurarHiloColaNucleos();
         configurarHiloMemoria();
+        configurarHiloDisco();
+    }
+    
+    /**
+     * Establece la función para el timer timerControlDisco que se encargará de actualizar...
+     * ...los valores del disco en la interfaz gráfica.
+     */
+    private void configurarHiloDisco(){
+        timerControlDisco = new Timer(1000, (ActionEvent ae) -> {
+            // Función que repetirá segun el intervalo asignado (1 segundo).
+            controlGraficoDisco();
+        });
+        // Inicializo el timer.
+        timerControlDisco.start();
+    }
+    
+    /**
+     * Controla los valores del disco que se muestran en la interfaz gráfica.
+     * Carga los valores del disco y actualiza los valores en la interfaz gráfica.
+     * Este método es invocado por el timer timerControlDisco.
+     */
+    private void controlGraficoDisco(){
+        String[] instruccion;
+        for(int i=0;i<CPU.LARGODISCO;i++){
+            instruccion = CPU.disco[i].split(" ");
+            modeloTablaDisco.setValueAt(instruccion[0], i, 1);
+            modeloTablaDisco.setValueAt(instruccion[1], i, 2);
+            modeloTablaDisco.setValueAt(instruccion[2], i, 3);
+        }
     }
     
     /**
@@ -1160,15 +1189,21 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     private void btCargarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btCargarArchivoActionPerformed
         JFileChooser cargador=new JFileChooser();
         cargador.setFileFilter(new FileNameExtensionFilter("ASM", "asm"));
+        cargador.setMultiSelectionEnabled(true);
         cargador.showOpenDialog(this);
-        File archivo=cargador.getSelectedFile();
-        if(archivo!=null){
-            rutaArchivo=archivo.getPath();
-            archivoCargado=true;
-            // Agrega la ruta del archivo a la lista de archivos.
-            archivos.add(archivo.getPath());
-            // Agrega el nombre del archivo a la tabla de archivos.
-            modeloTablaArchivos.addRow(new Object[]{archivo.getName(),false});
+        File[] archivosSeleccionados=cargador.getSelectedFiles();
+        File archivo;
+        if(archivosSeleccionados!=null){
+            int numeroArchivos=archivosSeleccionados.length;
+            for(int i=0;i<numeroArchivos;i++){
+                archivo=archivosSeleccionados[i];
+                rutaArchivo=archivo.getPath();
+                archivoCargado=true;
+                // Agrega la ruta del archivo a la lista de archivos.
+                archivos.add(archivo.getPath());
+                // Agrega el nombre del archivo a la tabla de archivos.
+                modeloTablaArchivos.addRow(new Object[]{archivo.getName(),false});
+            }
         }
     }//GEN-LAST:event_btCargarArchivoActionPerformed
 
