@@ -74,6 +74,7 @@ public class CPU {
                 try {
                     // Función que repetirá según el intervalo asignado (1 segundo).
                     verificarColas();
+                    
                 } catch (InterruptedException ex) {
                     // Modificar para mostrar mensaje correspondiente.
                     Logger.getLogger(CPU.class.getName()).log(Level.SEVERE, null, ex);
@@ -85,12 +86,14 @@ public class CPU {
     }
     
     private void verificarColas() throws InterruptedException{
-        if(nucleo1.obtenerEstado()){
+        
+        
+        if(nucleo1.obtenerEstado() && nucleo1.obtenerEstadoProceso()){
             if(colaTrabajoN1.size()>0){
                 nucleo1.recibirProceso(obtenerBCP(colaTrabajoN1.remove(0).numeroBCP));
             }
         }
-        if(nucleo2.obtenerEstado()){
+        if(nucleo2.obtenerEstado() && nucleo2.obtenerEstadoProceso()){
             if(colaTrabajoN2.size()>0){
                 nucleo2.recibirProceso(obtenerBCP(colaTrabajoN2.remove(0).numeroBCP));
             }

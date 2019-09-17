@@ -34,6 +34,7 @@ public class Nucleo {
     private int tiempoRestante=0; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
     private Stack < String > parametros = new Stack <> ();
     private int inicioMemoria, finMemoria;
+    private boolean estadoProceso = true;
     public Nucleo(){
         timerOperacion = new Timer(1000, new ActionListener() {
             @Override
@@ -80,7 +81,6 @@ public class Nucleo {
         String operacion = parts[0];
         String registro = parts[1];
         String numeroORegistro = parts[2];    
-        System.out.println("operacion: "+operacion);
         switch(operacion) {
             case "0001"://LOAD
                 registros[0] = registros[registroPosicion(registro)];
@@ -93,6 +93,7 @@ public class Nucleo {
                 break;
                 
             case "0011"://MOV
+               
                movimiento(registro,numeroORegistro);
                tiempoRestante=TiempoInstrucciones.MOV;
                break; 
@@ -120,10 +121,14 @@ public class Nucleo {
             case "1001"://JUMP [+/-Desplazamiento]
                 int decimal = Integer.parseInt(numeroORegistro.substring(1, 8),2);
                 if("1".equals(numeroORegistro.substring(0,1))){
-                    decimal *= -1;           
-                }   
-                PC -=1;
+                    decimal *= -1;
+                    PC -=2;
+                } 
+                                    
+
                 PC += decimal;
+                System.out.println("PC: "+PC+" Decimal: "+decimal);
+
                 tiempoRestante=TiempoInstrucciones.JUMP;
                 break;
             case "1010"://CMP Val1,Val2
@@ -135,7 +140,8 @@ public class Nucleo {
                     int decimal2 = Integer.parseInt(numeroORegistro.substring(1, 8),2);
                     if("1".equals(numeroORegistro.substring(0,1))){
                         decimal2 *= -1;           
-                    }              
+                    }       
+                    
                     PC += decimal2;                   
                 }
                 tiempoRestante=TiempoInstrucciones.JEJNE;
@@ -145,7 +151,8 @@ public class Nucleo {
                     int decimal3 = Integer.parseInt(numeroORegistro.substring(1, 8),2);
                     if("1".equals(numeroORegistro.substring(0,1))){
                         decimal3 *= -1;           
-                    }              
+                    }    
+                    
                     PC += decimal3;                   
                 }
                 tiempoRestante=TiempoInstrucciones.JEJNE;
@@ -295,6 +302,10 @@ public class Nucleo {
     public Boolean obtenerEstado(){
         return (tiempoRestante==0);// Si es igual a cero entonces está listo.
     }
+    public boolean obtenerEstadoProceso(){
+        return estadoProceso;
+    
+    }
     
     /**
      * Recibe el proceso de la cola de trabajo. Y lo pone a ejecutar.
@@ -324,11 +335,14 @@ public class Nucleo {
         System.out.println("PC: "+PC+ " finMemoria: "+procesoEjecutando.obtenerFinMemoria());
         if(PC>procesoEjecutando.obtenerFinMemoria()){
             // Si el pc supera al fin de memoria, entonces se llegó a la última instrucción
+            
+            procesoEjecutando.establecerEstado(BCP.TERMINADO);
+            estadoProceso = false;
             for(int i=inicioMemoria;i<=finMemoria;i++){
                 CPU.memoria[i] = "0000 0000 00000000";
             
             }
-            procesoEjecutando.establecerEstado(BCP.TERMINADO);
+            
         }// Esto comentado creo solo sería si se implementa multiples procesos al mismo tiempo para un núcleo
         /*else{
             // Si no es el último, entonces se establece en preparado
