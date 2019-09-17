@@ -69,11 +69,11 @@ public class Nucleo {
     private void Operaciones() throws InterruptedException{
         // Asigno el IR
         IR=PC;
-        instruccionIR=CPU.memoria[IR];
+        instruccionIR=CPU.memoriaVirtual[IR];
         procesoEjecutando.establecerCadenaInstruccionIR(instruccionIR);
         // Traigo la instrucción de memoria y aumento el PC
 
-        String instrucciones = CPU.memoria[PC++];
+        String instrucciones = CPU.memoriaVirtual[PC++];
 
         String[] parts;
         parts = instrucciones.split(" ");
@@ -121,8 +121,7 @@ public class Nucleo {
                 int decimal = Integer.parseInt(numeroORegistro.substring(1, 8),2);
                 if("1".equals(numeroORegistro.substring(0,1))){
                     decimal *= -1;           
-                }   
-                PC -=1;
+                }System.out.println("Decimal: "+decimal);
                 PC += decimal;
                 tiempoRestante=TiempoInstrucciones.JUMP;
                 break;
@@ -325,7 +324,7 @@ public class Nucleo {
         if(PC>procesoEjecutando.obtenerFinMemoria()){
             // Si el pc supera al fin de memoria, entonces se llegó a la última instrucción
             for(int i=inicioMemoria;i<=finMemoria;i++){
-                CPU.memoria[i] = "0000 0000 00000000";
+                CPU.memoriaVirtual[i] = "0000 0000 00000000";
             
             }
             procesoEjecutando.establecerEstado(BCP.TERMINADO);

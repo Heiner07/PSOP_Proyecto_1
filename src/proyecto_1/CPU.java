@@ -28,6 +28,8 @@ public class CPU {
     
     static final int LARGOMEMORIA = 128;
     static final int LARGODISCO = 1024;
+    static final int LARGOMEMORIAVIRTUAL = LARGOMEMORIA+LARGODISCO/2;
+    static String[] memoriaVirtual = new String[LARGOMEMORIAVIRTUAL];
     static String[] memoria = new String[LARGOMEMORIA];
     static String[] disco = new String[LARGODISCO];
     private Nucleo nucleo1, nucleo2;
@@ -37,7 +39,7 @@ public class CPU {
     private String[] parametros;
 
     /* Hilos de Control */
-    private Timer timerControlColasNucleos;
+    private Timer timerControlColasNucleos, timerControlMemoriaVirtual;
     
     public CPU(){
         this.nucleo1 = new Nucleo();
@@ -47,6 +49,8 @@ public class CPU {
         this.procesos = new ArrayList<>();
         this.idProceso = 0;
         inicializaMemoria();
+        inicializarDisco();
+        inicializarMemoriaVirtual();
         configuararHilos();
     }
     
@@ -56,11 +60,54 @@ public class CPU {
         }
     }
     
+    private void inicializarDisco(){
+        for(int i=0;i<CPU.LARGODISCO;i++){
+            CPU.disco[i] = "0000 0000 00000000";
+        }
+    }
+    
+    private void inicializarMemoriaVirtual(){
+        for(int i=0;i<CPU.LARGOMEMORIAVIRTUAL;i++){
+            CPU.memoriaVirtual[i] = "0000 0000 00000000";
+        }
+    }
+    
     /**
      * Se encarga de llamar a las distintas funciones que controlan la ejecucion de la instrucciones.
      */
     private void configuararHilos(){
         configurarHiloColasNucleos();
+        configurarHiloMemoriaVirtual();
+    }
+    
+    /**
+     * Establece la funcion para el timer timerControlMemoriaVirtual que se encargará de establecer...
+     * ...los valores de la memoria virtual en la memoria o en el disco (como memoria virtual).
+     */
+    private void configurarHiloMemoriaVirtual(){
+        timerControlMemoriaVirtual = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                // Función que repetirá según el intervalo asignado (1 segundo).
+                controlMemoriaVirtual();
+            }
+        });
+        // Inicializo el timer.
+        timerControlMemoriaVirtual.start();
+    }
+    
+    /**
+     * Establece los valores de la memoria virtual en la memoria y en el disco según corresponda.
+     * Función llamada por el timerControlMemoriaVirtual.
+     */
+    private void controlMemoriaVirtual(){
+        for(int i=0;i<CPU.LARGOMEMORIAVIRTUAL;i++){
+            if(i<CPU.LARGOMEMORIA){
+                CPU.memoria[i]=CPU.memoriaVirtual[i];
+            }else{
+                CPU.disco[i-CPU.LARGOMEMORIA]=CPU.memoriaVirtual[i];
+            }
+        }
     }
     
     /**
@@ -84,6 +131,11 @@ public class CPU {
         timerControlColasNucleos.start();
     }
     
+    /**
+     * Verifica cuando un núcleo queda disponible y le envía el proceso siguiente.
+     * Función llamada por el timerControlColasNucleos.
+     * @throws InterruptedException 
+     */
     private void verificarColas() throws InterruptedException{
         if(nucleo1.obtenerEstado()){
             if(colaTrabajoN1.size()>0){
@@ -216,25 +268,25 @@ public class CPU {
             
             if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
                  if(parteOperacion.length == 2){
-                    CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
+                    CPU.memoriaVirtual[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
                  }else{
-                    CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+"0000"+" 00000000";
+                    CPU.memoriaVirtual[inicioMemoria] = toBinario(instruccionEnbits)+" "+"0000"+" 00000000";
                  }
             }else{
                 parteResto = parteOperacion[1].split(",");
                 if(parteResto.length >=2){
                     try{
-                        CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));                   
-                    }catch(Exception e){
-                        CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);    
+                        CPU.memoriaVirtual[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" "+decimalABinaro(Integer.parseInt(parteResto[1]));                   
+                    }catch(NumberFormatException e){
+                        CPU.memoriaVirtual[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000"+toBinario(parteResto[1]);    
                     }
 
                 }else{
                     //Verifico si es jum, je, jne
                     if("JUMP".equals(instruccionEnbits) || "JE".equals(instruccionEnbits) || "JNE".equals(instruccionEnbits)){
-                        CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
+                        CPU.memoriaVirtual[inicioMemoria] = toBinario(instruccionEnbits)+ " 0000 " +decimalABinaro(Integer.parseInt(parteResto[0]));
                     }else{
-                        CPU.memoria[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
+                        CPU.memoriaVirtual[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteResto[0])+" 00000000";                  
                     }
                     
                 }//SALE ELSE DENTRO              
@@ -359,10 +411,10 @@ public class CPU {
             return new int[]{inicioMemoria, finMemoria};
         }else{
             // Si no hay espacio según lo anterior, pueden pasar tres cosas:
-            if(numeroProcesos==0 && memoriaRequerida<CPU.LARGOMEMORIA){
+            if(numeroProcesos==0 && memoriaRequerida<CPU.LARGOMEMORIAVIRTUAL){
                 // No hay bloques y el programa cabe en memoria
                 return new int[]{0, memoriaRequerida-1};
-            }else if(CPU.LARGOMEMORIA-finMemoriaTemp>=memoriaRequerida+1){
+            }else if(CPU.LARGOMEMORIAVIRTUAL-finMemoriaTemp>=memoriaRequerida+1){
                 // Hay espacio después del ultimo bloque.
                 return new int[]{finMemoriaTemp+1, finMemoriaTemp+memoriaRequerida};
             }else{
