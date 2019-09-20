@@ -32,6 +32,8 @@ public class CPU {
     static String[] memoriaVirtual = new String[LARGOMEMORIAVIRTUAL];
     static String[] memoria = new String[LARGOMEMORIA];
     static String[] disco = new String[LARGODISCO];
+    static List<Interrupcion> interrupciones = new ArrayList<>();
+    private Interrupcion interrupcionEnEjecucion;
     private Nucleo nucleo1, nucleo2;
     private List<Trabajo> colaTrabajoN1, colaTrabajoN2;
     private List<BCP> procesos;
@@ -39,11 +41,12 @@ public class CPU {
     private String[] parametros;
 
     /* Hilos de Control */
-    private Timer timerControlColasNucleos, timerControlMemoriaVirtual;
+    private Timer timerControlColasNucleos, timerControlMemoriaVirtual, timerControlInterrupciones;
     
     public CPU(){
-        this.nucleo1 = new Nucleo();
-        this.nucleo2 = new Nucleo();
+        this.interrupcionEnEjecucion = null;
+        this.nucleo1 = new Nucleo(0);
+        this.nucleo2 = new Nucleo(1);
         this.colaTrabajoN1 = new ArrayList<>();
         this.colaTrabajoN2 = new ArrayList<>();
         this.procesos = new ArrayList<>();
@@ -51,7 +54,7 @@ public class CPU {
         inicializaMemoria();
         inicializarDisco();
         inicializarMemoriaVirtual();
-        configuararHilos();
+        configurarHilos();
     }
     
     private void inicializaMemoria(){
@@ -75,9 +78,44 @@ public class CPU {
     /**
      * Se encarga de llamar a las distintas funciones que controlan la ejecucion de la instrucciones.
      */
-    private void configuararHilos(){
+    private void configurarHilos(){
         configurarHiloColasNucleos();
         configurarHiloMemoriaVirtual();
+        configurarHiloInterrupciones();
+    }
+    
+    /**
+     * Establece la función para el timer timerControlInterrupciones que se encargará de verificar...
+     * si hay interrupciones que ejecutar....
+     */
+    private void configurarHiloInterrupciones(){
+        timerControlInterrupciones = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                // Función que repetirá según el intervalo asignado (1 segundo).
+                controlInterrupciones();
+            }
+        });
+        // Inicializo el timer.
+        timerControlInterrupciones.start();
+    }
+    
+    /**
+     * Verifica si hay interrupciones por ejecutar.
+     */
+    private void controlInterrupciones(){
+        // Si en la lista hay interrupciones y no hay ninguna en ejecución (igual a null)
+        if(CPU.interrupciones.size()>0 && interrupcionEnEjecucion==null){
+            interrupcionEnEjecucion=CPU.interrupciones.remove(0);
+        }
+        // Si hay una interrupción y está completada, se envía al núcleo correspondiente.
+        if(interrupcionEnEjecucion!=null && interrupcionEnEjecucion.obtenerEstado()){
+            if(interrupcionEnEjecucion.obtenerNumeroNucleo()==0){
+                nucleo1.recibirInterrupcion(interrupcionEnEjecucion);
+            }else{
+                nucleo2.recibirInterrupcion(interrupcionEnEjecucion);
+            }interrupcionEnEjecucion=null;
+        }
     }
     
     /**
@@ -139,13 +177,12 @@ public class CPU {
      */
     private void verificarColas() throws InterruptedException{
         
-        
-        if(nucleo1.obtenerEstado() && nucleo1.obtenerEstadoProceso()){
+        if(nucleo1.obtenerEstado()){
             if(colaTrabajoN1.size()>0){
                 nucleo1.recibirProceso(obtenerBCP(colaTrabajoN1.remove(0).numeroBCP));
             }
         }
-        if(nucleo2.obtenerEstado() && nucleo2.obtenerEstadoProceso()){
+        if(nucleo2.obtenerEstado()){
             if(colaTrabajoN2.size()>0){
                 nucleo2.recibirProceso(obtenerBCP(colaTrabajoN2.remove(0).numeroBCP));
             }
@@ -174,6 +211,10 @@ public class CPU {
     
     public List<BCP> obtenerProcesos(){
         return procesos;
+    }
+    
+    public Interrupcion obtenerInterrupcion(){
+        return interrupcionEnEjecucion;
     }
     
     private void verificaProcesos(){

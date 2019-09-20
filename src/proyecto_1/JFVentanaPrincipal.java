@@ -5,21 +5,16 @@
  */
 package proyecto_1;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -31,6 +26,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     int posicionMemoria;
     String rutaArchivo;
     Boolean archivoCargado;
+    Interrupcion interrupcion;
     DefaultTableModel modeloTablaArchivos, modeloTablaMemoria, modeloTablaDisco;
     DefaultTableModel modeloTablaColaN1, modeloTablaColaN2;
     List<String> archivos;
@@ -39,7 +35,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     
     /* Hilos de control */
     Timer timerControlBCPs, timerControlNucleos, timerControlColaNucleos;
-    Timer timerControlMemoria, timerControlDisco;
+    Timer timerControlMemoria, timerControlDisco, timerControlInterrupciones;
     
     /**
      * Creates new form JFVentanaPrincipal
@@ -52,10 +48,10 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         this.modeloTablaColaN1 = (DefaultTableModel) jtColaN1.getModel();
         this.modeloTablaColaN2 = (DefaultTableModel) jtColaN2.getModel();
         this.modeloTablaArchivos = (DefaultTableModel) jtArchivos.getModel();
-        //configurarTabla();
         this.archivos=new ArrayList<>();
         this.BCPs=new ArrayList<>();
         this.cpu=new CPU();
+        this.interrupcion=null;
         this.archivoCargado=false;
         configuararHilos();
         this.setLocationRelativeTo(null);
@@ -75,47 +71,6 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         }
     }
     
-    // No estoy utilizando este metodo, pero lo mantengo por si requiere de algunas funciones que hay aqui.
-    private void configurarTabla(){
-        String[] columnas = new String[]{"Archivo", "", ""};
-        Object[][] datos = new Object[][]{};
-        this.jtArchivos.setModel(new DefaultTableModel(datos, columnas){
-            Class[] tipos = new Class[]{
-                java.lang.String.class,
-                JButton.class,
-                JButton.class
-            };
-            
-            @Override
-            public Class getColumnClass(int columnIndex) {
-                // Este método es invocado por el CellRenderer para saber que dibujar en la celda,
-                // observen que estamos retornando la clase que definimos de antemano.
-                return tipos[columnIndex];
-            }
-
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                // Sobrescribimos este método para evitar que la columna que contiene los botones sea editada.
-                return false;//!(this.getColumnClass(column).equals(JButton.class));
-            }
-        });
-        
-        this.jtArchivos.setDefaultRenderer(JButton.class, new TableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable jtable, Object o, boolean bln, boolean bln1, int i, int i1) {
-                /**
-                 * Retorna el objeto que se va a dibujar en la celda.
-                 * Se dibujará en la celda el objeto que devuelva el TableModel. También 
-                 * Este renderer retorna el objeto tal y como lo recibe (dibuja cualquier componente).
-                 */
-                return (Component) o;
-            }
-        });
-        this.jtArchivos.getColumnModel().getColumn(0).setPreferredWidth(80);
-        this.jtArchivos.getColumnModel().getColumn(1).setPreferredWidth(40);
-        this.jtArchivos.getColumnModel().getColumn(2).setPreferredWidth(40);
-    }
-    
     private void establecerValores(){
         this.paso=1;
         this.posicionMemoria=0;
@@ -131,6 +86,37 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         configurarHiloColaNucleos();
         configurarHiloMemoria();
         configurarHiloDisco();
+        configurarHiloInterrupciones();
+    }
+    
+    /**
+     * Establece la función para el timer timerControlInterrupciones que se encargará de reflejar...
+     * ...la ejecución de la interrupción en la interfaz.
+     */
+    private void configurarHiloInterrupciones(){
+        timerControlInterrupciones = new Timer(1000, (ActionEvent ae) -> {
+            // Función que repetirá segun el intervalo asignado (1 segundo).
+            controlGraficoInterrupciones();
+        });
+        // Inicializo el timer.
+        timerControlInterrupciones.start();
+    }
+    
+    /**
+     * Se encarga de mostrar las interrupciones del sistema (en consola y pantalla).
+     * Este método es invocado por el timer timerControlInterrupciones.
+     */
+    private void controlGraficoInterrupciones(){
+        if(interrupcion==null){
+            if(cpu.obtenerInterrupcion()!=null && !cpu.obtenerInterrupcion().obtenerEstado()){
+                interrupcion=cpu.obtenerInterrupcion();
+                if(interrupcion.obtenerNumeroInterrupcion()==Interrupcion.FINALIZAR_PROGRAMA){
+                    taPantalla.setText(taPantalla.getText()+"Presione ENTER para finalizar el proceso...");
+                    tfConsola.setEnabled(true);
+                    tfConsola.requestFocus();
+                }
+            }
+        }
     }
     
     /**
@@ -535,9 +521,11 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -585,9 +573,11 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(0, 231, Short.MAX_VALUE))
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -975,6 +965,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
 
         taPantalla.setEditable(false);
         taPantalla.setColumns(20);
+        taPantalla.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         taPantalla.setRows(5);
         jScrollPane6.setViewportView(taPantalla);
 
@@ -985,6 +976,12 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         jLabel5.setText("Consola");
 
         tfConsola.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        tfConsola.setEnabled(false);
+        tfConsola.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                tfConsolaKeyTyped(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
         jPanel10.setLayout(jPanel10Layout);
@@ -1015,6 +1012,8 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
                 .addComponent(tfConsola, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         jLabel6.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         jLabel6.setText("Colas de trabajo");
@@ -1084,10 +1083,12 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1129,9 +1130,9 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
                     .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1211,6 +1212,16 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         Configuracion configuracion = new Configuracion(this, true);
         configuracion.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void tfConsolaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfConsolaKeyTyped
+        /* Se encarga de detectar el enter en el campo de texto consola y establece la interrupción como completa*/
+        if(evt.getKeyChar()=='\n'){
+            taPantalla.setText(taPantalla.getText()+"\n");
+            tfConsola.setEnabled(false);
+            interrupcion.establecerComoEjecutada();
+            interrupcion=null;
+        }
+    }//GEN-LAST:event_tfConsolaKeyTyped
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btAnalizarArchivo;
