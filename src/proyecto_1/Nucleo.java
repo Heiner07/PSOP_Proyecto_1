@@ -31,10 +31,11 @@ public class Nucleo {
     private boolean bandera= false;
     private Boolean ejecutar = false;
     private Timer timerOperacion;
-    private int tiempoRestante=0; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
+    private int tiempoRestante=1; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
     private Stack < String > parametros = new Stack <> ();
     private int inicioMemoria, finMemoria;
     private boolean estadoProceso = true;
+    private String instrucciones;
     public Nucleo(){
         timerOperacion = new Timer(1000, new ActionListener() {
             @Override
@@ -74,8 +75,8 @@ public class Nucleo {
         procesoEjecutando.establecerCadenaInstruccionIR(instruccionIR);
         // Traigo la instrucción de memoria y aumento el PC
 
-        String instrucciones = CPU.memoriaVirtual[PC++];
-
+        instrucciones = CPU.memoriaVirtual[PC++];
+        
         String[] parts;
         parts = instrucciones.split(" ");
         String operacion = parts[0];
@@ -83,42 +84,49 @@ public class Nucleo {
         String numeroORegistro = parts[2];    
         switch(operacion) {
             case "0001"://LOAD
-                registros[0] = registros[registroPosicion(registro)];
                 tiempoRestante=TiempoInstrucciones.LOAD;
+                registros[0] = registros[registroPosicion(registro)];
+                
                 break;    
                 
             case "0010"://STORE
-                registros[registroPosicion(registro)] = registros[0];
                 tiempoRestante=TiempoInstrucciones.STORE;
+                registros[registroPosicion(registro)] = registros[0];
+                
                 break;
                 
             case "0011"://MOV
-               
-               movimiento(registro,numeroORegistro);
                tiempoRestante=TiempoInstrucciones.MOV;
+               movimiento(registro,numeroORegistro);
+               
                break; 
                 
             case "0100"://SUB
-                restar(registro,numeroORegistro);
                 tiempoRestante=TiempoInstrucciones.SUB;
+                restar(registro,numeroORegistro);
+                
                 break;
                 
             case "0101"://ADD
-                sumar(registro, numeroORegistro);
                 tiempoRestante=TiempoInstrucciones.ADD;
+                sumar(registro, numeroORegistro);
+                
                 break;
             case "0110"://INC  
-                incrementar(registro);
                 tiempoRestante=TiempoInstrucciones.INC;
+                incrementar(registro);
+                
                 break;
             case "0111"://DEC
-                decrementar(registro);
                 tiempoRestante=TiempoInstrucciones.DEC;
+                decrementar(registro);
+                
                 break;
             case "1000"://INT 20H
                 
                 break;
             case "1001"://JUMP [+/-Desplazamiento]
+                tiempoRestante=TiempoInstrucciones.JUMP;
                 int decimal = Integer.parseInt(numeroORegistro.substring(1, 8),2);
                 if("1".equals(numeroORegistro.substring(0,1))){
                     decimal *= -1;
@@ -129,39 +137,46 @@ public class Nucleo {
                             
                 
                 PC += decimal;
-                System.out.println("PC: "+PC+" Decimal: "+decimal);
+                //tem.out.println("PC: "+PC+" Decimal: "+decimal);
 
-                tiempoRestante=TiempoInstrucciones.JUMP;
+                
                 break;
             case "1010"://CMP Val1,Val2
-                compararValores(registro,numeroORegistro);
                 tiempoRestante=TiempoInstrucciones.CMP;
+                compararValores(registro,numeroORegistro);
+                
                 break;
             case "1011"://JE [ +/-Desplazamiento]
+                tiempoRestante=TiempoInstrucciones.JEJNE;
                 if(bandera){
                     int decimal2 = Integer.parseInt(numeroORegistro.substring(1, 8),2);
                     if("1".equals(numeroORegistro.substring(0,1))){
-                        decimal2 *= -1;           
+                        decimal2 *= -1;    
+                        PC-=2;
                     }       
                     
                     PC += decimal2;                   
                 }
-                tiempoRestante=TiempoInstrucciones.JEJNE;
+                
                 break;
             case "1100"://JNE [ +/-Desplazamiento]
+                tiempoRestante=TiempoInstrucciones.JEJNE;
                 if(!bandera){
                     int decimal3 = Integer.parseInt(numeroORegistro.substring(1, 8),2);
                     if("1".equals(numeroORegistro.substring(0,1))){
-                        decimal3 *= -1;           
+                        decimal3 *= -1;    
+                        PC-=2;
+
                     }    
                     
                     PC += decimal3;                   
                 }
-                tiempoRestante=TiempoInstrucciones.JEJNE;
+                
                 break;
             case "1101"://POP AX
-                popRegistro(registro);
                 tiempoRestante=TiempoInstrucciones.POP;
+                popRegistro(registro);
+                
                 break;          
             default:             
                 break;
@@ -320,6 +335,7 @@ public class Nucleo {
             establecerContexto(proceso);
             ejecutar=true;
         }else if(procesoEjecutando.obtenerNumeroProceso()==proceso.obtenerNumeroProceso()){
+            procesoEjecutando.establecerEstado(BCP.EN_EJECUCION);
             // Si es el mismo proceso, solo indico que ejecute la siguiente instrucción
             ejecutar=true;
         }else{
@@ -334,7 +350,7 @@ public class Nucleo {
      * Esta función se llama para el cambio de contexto y cada vez que termina Operaciones (Para reflejar los cambios en la interfaz)
      */
     private void guardarContexto(){
-        System.out.println("PC: "+PC+ " finMemoria: "+procesoEjecutando.obtenerFinMemoria());
+        //System.out.println("PC: "+PC+ " finMemoria: "+procesoEjecutando.obtenerFinMemoria());
         if(PC>procesoEjecutando.obtenerFinMemoria()){
             // Si el pc supera al fin de memoria, entonces se llegó a la última instrucción
             
@@ -350,7 +366,7 @@ public class Nucleo {
             // Si no es el último, entonces se establece en preparado
             procesoEjecutando.establecerEstado(BCP.PREPARADO);
         }*/
-        procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC,parametros);
+        procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC,parametros,instrucciones);
     }
     
     /**
@@ -381,6 +397,9 @@ public class Nucleo {
      */
     private void cambioContexto(BCP procesoEntrante){
         guardarContexto();
+        if(procesoEjecutando.obtenerEstadoProceso()!=BCP.TERMINADO){
+            procesoEjecutando.establecerEstado(BCP.EN_ESPERA);
+        }      
         establecerContexto(procesoEntrante);
     }
     

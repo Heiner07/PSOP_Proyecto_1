@@ -182,7 +182,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     private void controlGraficoMemoria(){
         String[] instruccion;
         for(int i=0;i<CPU.LARGOMEMORIA;i++){
-            instruccion = CPU.memoria[i].split(" ");
+            instruccion = CPU.memoriaVirtual[i].split(" ");
             modeloTablaMemoria.setValueAt(instruccion[0], i, 1);
             modeloTablaMemoria.setValueAt(instruccion[1], i, 2);
             modeloTablaMemoria.setValueAt(instruccion[2], i, 3);
@@ -212,7 +212,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
      */
     private void controlGraficoColaNucleos(){
         // Obtengo todos los procesos del CPU
-        List<Trabajo> colaN1 = cpu.obtenerColaTrabajoN1();
+        /*List<Trabajo> colaN1 = cpu.obtenerColaTrabajoN1();
         List<Trabajo> colaN2 = cpu.obtenerColaTrabajoN2();
         int numeroProcesosColaN1 = colaN1.size();
         int numeroProcesosColaN2 = colaN2.size();
@@ -222,7 +222,23 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         }
         for(int i=0;i<numeroProcesosColaN2;i++){
             modeloTablaColaN2.addRow(new Object[]{"BCP "+colaN2.get(i).obtenerNumeroBCP()});
+        }*/
+        
+        List<Trabajo> colaN1 = CPU.colaImprimir1;
+        List<Trabajo> colaN2 = CPU.colaImprimir2;
+        
+        int numeroProcesosColaN1 = colaN1.size();
+        int numeroProcesosColaN2 = colaN2.size();
+        limpiarColas();
+        for(int i=0;i<numeroProcesosColaN1;i++){
+            modeloTablaColaN1.addRow(new Object[]{"BCP"+colaN1.get(i).obtenerNumeroBCP()+"   "+colaN1.get(i).obtenerInstruccion()});
         }
+        for(int i=0;i<numeroProcesosColaN2;i++){
+            modeloTablaColaN2.addRow(new Object[]{"BCP"+colaN2.get(i).obtenerNumeroBCP()+"   "+colaN2.get(i).obtenerInstruccion()});
+            
+        }
+        
+       
     }
     
     

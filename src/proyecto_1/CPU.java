@@ -37,6 +37,9 @@ public class CPU {
     private List<BCP> procesos;
     private int idProceso;
     private String[] parametros;
+    private int procesoCola1,procesoCola2;
+    
+    static List<Trabajo> colaImprimir1,colaImprimir2;
 
     /* Hilos de Control */
     private Timer timerControlColasNucleos, timerControlMemoriaVirtual;
@@ -46,6 +49,8 @@ public class CPU {
         this.nucleo2 = new Nucleo();
         this.colaTrabajoN1 = new ArrayList<>();
         this.colaTrabajoN2 = new ArrayList<>();
+        CPU.colaImprimir1 = new ArrayList<>();
+        CPU.colaImprimir2 = new ArrayList<>();
         this.procesos = new ArrayList<>();
         this.idProceso = 0;
         inicializaMemoria();
@@ -138,19 +143,148 @@ public class CPU {
      * @throws InterruptedException 
      */
     private void verificarColas() throws InterruptedException{
-        
-        
-        if(nucleo1.obtenerEstado() && nucleo1.obtenerEstadoProceso()){
-            if(colaTrabajoN1.size()>0){
-                nucleo1.recibirProceso(obtenerBCP(colaTrabajoN1.remove(0).numeroBCP));
+        if(!colaTrabajoN1.isEmpty()){  
+            
+            if(nucleo1.obtenerEstado()){
+               /*int procesoSiguiente= colaTrabajoN1.get(0).numeroBCP;               
+                BCP procesoAEjecutar = obtenerBCP(procesoSiguiente);
+                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
+
+                    System.out.println("Cola1: "+procesoAEjecutar.obtenerCadenaInstruccionIR());
+                    nucleo1.recibirProceso(procesoAEjecutar);
+                }
+                */
+               colaImprimir1.clear();
+               BCP procesoAEjecutar = retornarProceso(1);
+               listadoColas(1);
+               if(colaImprimir1.isEmpty()){
+                   colaImprimir1 = new ArrayList<>();              
+               }
+              
+               procesoCola1++;
+               if(procesoAEjecutar!=null){                  
+                   nucleo1.recibirProceso(procesoAEjecutar);
+                   
+               }
             }
         }
-        if(nucleo2.obtenerEstado() && nucleo2.obtenerEstadoProceso()){
-            if(colaTrabajoN2.size()>0){
-                nucleo2.recibirProceso(obtenerBCP(colaTrabajoN2.remove(0).numeroBCP));
+        if(!colaTrabajoN2.isEmpty()){
+            if(nucleo2.obtenerEstado()){
+               colaImprimir2.clear();
+               BCP procesoAEjecutar = retornarProceso(2);
+               listadoColas(2);
+               if(colaImprimir2.isEmpty()){
+                   colaImprimir2 = new ArrayList<>();              
+               }
+               procesoCola2++;
+               if(procesoAEjecutar!=null){                  
+                   nucleo2.recibirProceso(procesoAEjecutar);
+                   
+               }
             }
         }
     }
+    
+    
+    
+    
+    public BCP retornarProceso(int numeroCola){
+        if(numeroCola == 1){
+            int largoCola = colaTrabajoN1.size()-1;
+            
+            if(procesoCola1 > largoCola){
+               procesoCola1 = 0;          
+            }
+            int proc;
+            for(;procesoCola1<=largoCola;procesoCola1++){
+                proc = colaTrabajoN1.get(procesoCola1).numeroBCP;
+                BCP procesoAEjecutar = obtenerBCP(proc);
+                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
+                    return procesoAEjecutar;
+                    
+                }
+                              
+            }  
+           
+        }else{
+            int largoCola = colaTrabajoN2.size()-1;           
+            if(procesoCola2 > largoCola){
+               procesoCola2 = 0;          
+            }         
+           
+            int proc;
+            for(;procesoCola2<=largoCola;procesoCola2++){
+                proc = colaTrabajoN2.get(procesoCola2).numeroBCP;
+                BCP procesoAEjecutar = obtenerBCP(proc);
+                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
+                    return procesoAEjecutar;
+                    
+                }
+                              
+            }  
+        }//SALE ELSE
+        return null;
+    }
+    
+    
+    public void listadoColas(int numeroCola){
+        Trabajo trabajo;
+        
+        
+        int numProceso;
+        
+        if(numeroCola == 1){
+            
+            numProceso = procesoCola1;
+            int largoCola = colaTrabajoN1.size()-1;          
+            if(numProceso > largoCola){
+               numProceso = 0;          
+            }
+            int proc;
+            //System.out.println("procesoCola1: "+numProceso+" colaTrabajoN1.size: "+largoCola);
+            for(;numProceso<=largoCola;numProceso++){
+                proc = colaTrabajoN1.get(numProceso).numeroBCP;
+                BCP procesoAEjecutar = obtenerBCP(proc);
+               // System.out.println(procesoAEjecutar.obtenerPC()+" <= "+ procesoAEjecutar.obtenerFinMemoria());
+                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
+                    trabajo=new Trabajo(0, proc,memoriaVirtual[procesoAEjecutar.obtenerPC()]);
+                    
+                    colaImprimir1.add(trabajo);
+                    
+                }
+                              
+            }  //System.out.println("\n\n");
+           
+        }else{
+           
+            numProceso = procesoCola2;
+            int largoCola = colaTrabajoN2.size()-1;          
+            if(numProceso > largoCola){
+               numProceso = 0;          
+            }
+            int proc;
+            //System.out.println("procesoCola1: "+numProceso+" colaTrabajoN1.size: "+largoCola);
+            for(;numProceso<=largoCola;numProceso++){
+                proc = colaTrabajoN2.get(numProceso).numeroBCP;
+                BCP procesoAEjecutar = obtenerBCP(proc);
+                //System.out.println(procesoAEjecutar.obtenerPC()+" <= "+ procesoAEjecutar.obtenerFinMemoria());
+                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
+                    trabajo=new Trabajo(1, proc,memoriaVirtual[procesoAEjecutar.obtenerPC()]);
+                    colaImprimir2.add(trabajo);
+                    
+                }
+                              
+            }  //System.out.println("\n\n");
+        
+        
+        }//SALE ELSE
+        
+    }
+    
+   
+        
+    
+    
     
     public String[] obtenerParametros(){
         return parametros;
@@ -186,6 +320,8 @@ public class CPU {
             }
         }
     }
+    
+    
     
     private BCP obtenerBCP(int numeroBCP){
         int numeroProcesos = procesos.size();
@@ -238,6 +374,7 @@ public class CPU {
         int idProcesoNuevo=this.idProceso++;
         int estadoProceso;
         int nucleo = (int) (Math.random() * 2); // Se determina el núcleo donde se ejecutará el proceso.
+        
         Boolean agregarACola=false; // Me indica si agrego el proceso a una cola.
         if(finInicioMemoria[0]==-1){
             // Si no hay espacio, entonces no se cargan las instrucciones en memoria.
@@ -363,6 +500,15 @@ public class CPU {
     private void agregarProcesoCola(int nucleo, int idProcesoNuevo, int numeroInstrucciones){
         Trabajo trabajo;
         if(nucleo==0){
+            
+                trabajo=new Trabajo(0, idProcesoNuevo);
+                colaTrabajoN1.add(trabajo);
+            
+        }else{           
+                trabajo=new Trabajo(1, idProcesoNuevo);
+                colaTrabajoN2.add(trabajo);
+        }
+        /*if(nucleo==0){
             for(int i=0;i<numeroInstrucciones;i++){
                 trabajo=new Trabajo(0, idProcesoNuevo);
                 colaTrabajoN1.add(trabajo);
@@ -372,7 +518,7 @@ public class CPU {
                 trabajo=new Trabajo(1, idProcesoNuevo);
                 colaTrabajoN2.add(trabajo);
             }
-        }
+        }*/
     }
     
     /**

@@ -34,6 +34,7 @@ public class BCP {
     private Stack < String > parametros = new Stack <> ();
     //Limites de memoria
     private int inicioMemoria, finMemoria;
+    private String instrucciones;
     
     public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria, int nucleo,Stack<String> parametros ){
         this.AX=0;
@@ -50,8 +51,7 @@ public class BCP {
         this.finMemoria=finMemoria;
         this.PC=inicioMemoria;
         this.nucleo=nucleo;
-        this.segundos=0;
-        this.parametros = parametros;
+        this.segundos=0;     
         this.timer=new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -71,7 +71,7 @@ public class BCP {
         }
     }
     
-    public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC, int PC,Stack<String> parametros ){
+    public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC, int PC,Stack<String> parametros,String instrucciones  ){
         this.AX=AX;
         this.BX=BX;
         this.CX=CX;
@@ -80,8 +80,12 @@ public class BCP {
         this.AC=AC;
         this.PC=PC;
         this.parametros = parametros;
+        this.instrucciones = instrucciones;
+       
     }
-    
+    public String obtenerInstrucciones(){
+        return instrucciones;
+    }
     public int obtenerNumeroProceso(){
         return numeroProceso;
     }

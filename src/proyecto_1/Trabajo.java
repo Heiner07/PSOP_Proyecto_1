@@ -12,10 +12,18 @@ package proyecto_1;
 public class Trabajo {
     int nucleoProcesador;
     int numeroBCP;
+    String instruccion;
     
     public Trabajo(int nucleoProcesador, int numeroBCP){
         this.nucleoProcesador=nucleoProcesador;
         this.numeroBCP=numeroBCP;
+       
+    }
+    public Trabajo(int nucleoProcesador, int numeroBCP,String instruccion){
+        this.nucleoProcesador=nucleoProcesador;
+        this.numeroBCP=numeroBCP;
+        this.instruccion = instruccion;
+       
     }
     
     public int obtenerNucleoProcesador(){
@@ -24,5 +32,9 @@ public class Trabajo {
     
     public int obtenerNumeroBCP(){
         return numeroBCP;
+    }
+    public String obtenerInstruccion(){
+        return instruccion;
+    
     }
 }

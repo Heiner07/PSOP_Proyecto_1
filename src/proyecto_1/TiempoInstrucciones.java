@@ -10,10 +10,10 @@ package proyecto_1;
  * @author Heiner
  */
 public class TiempoInstrucciones {
-    static int LOAD = 2;
-    static int STORE = 2;
-    static int MOV = 1;
-    static int ADD = 3;
+    static int LOAD = 5;
+    static int STORE = 10;
+    static int MOV = 10;
+    static int ADD = 10;
     static int SUB = 3;
     static int INC = 1;
     static int DEC = 1;
