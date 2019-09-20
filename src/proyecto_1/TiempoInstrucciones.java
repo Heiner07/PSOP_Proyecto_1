@@ -20,6 +20,6 @@ public class TiempoInstrucciones {
     static int JUMP = 2;
     static int CMP = 2;
     static int JEJNE = 2;
-    static int POP = 1;
+    static int POP = 4;
     static int PARAM = 3;
 }

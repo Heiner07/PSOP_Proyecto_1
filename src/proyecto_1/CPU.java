@@ -226,7 +226,7 @@ public class CPU {
             for(;procesoCola1<=largoCola;procesoCola1++){
                 proc = colaTrabajoN1.get(procesoCola1).numeroBCP;
                 BCP procesoAEjecutar = obtenerBCP(proc);
-                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
+                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
                     return procesoAEjecutar;
                     
                 }
@@ -243,7 +243,7 @@ public class CPU {
             for(;procesoCola2<=largoCola;procesoCola2++){
                 proc = colaTrabajoN2.get(procesoCola2).numeroBCP;
                 BCP procesoAEjecutar = obtenerBCP(proc);
-                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
+                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
                     return procesoAEjecutar;
                     
                 }
@@ -273,7 +273,7 @@ public class CPU {
                 proc = colaTrabajoN1.get(numProceso).numeroBCP;
                 BCP procesoAEjecutar = obtenerBCP(proc);
                // System.out.println(procesoAEjecutar.obtenerPC()+" <= "+ procesoAEjecutar.obtenerFinMemoria());
-                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
+                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
                     trabajo=new Trabajo(0, proc,memoriaVirtual[procesoAEjecutar.obtenerPC()]);
                     
                     colaImprimir1.add(trabajo);
@@ -295,13 +295,13 @@ public class CPU {
                 proc = colaTrabajoN2.get(numProceso).numeroBCP;
                 BCP procesoAEjecutar = obtenerBCP(proc);
                 //System.out.println(procesoAEjecutar.obtenerPC()+" <= "+ procesoAEjecutar.obtenerFinMemoria());
-                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
+                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
                     trabajo=new Trabajo(1, proc,memoriaVirtual[procesoAEjecutar.obtenerPC()]);
                     colaImprimir2.add(trabajo);
                     
                 }
                               
-            }  //System.out.println("\n\n");
+            }
         
         
         }//SALE ELSE

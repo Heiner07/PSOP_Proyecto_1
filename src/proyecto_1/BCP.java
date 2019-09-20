@@ -52,6 +52,7 @@ public class BCP {
         this.PC=inicioMemoria;
         this.nucleo=nucleo;
         this.segundos=0;     
+        this.parametros = parametros;
         this.timer=new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
