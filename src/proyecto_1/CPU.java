@@ -32,6 +32,8 @@ public class CPU {
     static String[] memoriaVirtual = new String[LARGOMEMORIAVIRTUAL];
     static String[] memoria = new String[LARGOMEMORIA];
     static String[] disco = new String[LARGODISCO];
+    static List<Interrupcion> interrupciones = new ArrayList<>();
+    private Interrupcion interrupcionEnEjecucion;
     private Nucleo nucleo1, nucleo2;
     private List<Trabajo> colaTrabajoN1, colaTrabajoN2;
     private List<BCP> procesos;
@@ -42,11 +44,12 @@ public class CPU {
     static List<Trabajo> colaImprimir1,colaImprimir2;
 
     /* Hilos de Control */
-    private Timer timerControlColasNucleos, timerControlMemoriaVirtual;
+    private Timer timerControlColasNucleos, timerControlMemoriaVirtual, timerControlInterrupciones;
     
     public CPU(){
-        this.nucleo1 = new Nucleo();
-        this.nucleo2 = new Nucleo();
+        this.interrupcionEnEjecucion = null;
+        this.nucleo1 = new Nucleo(0);
+        this.nucleo2 = new Nucleo(1);
         this.colaTrabajoN1 = new ArrayList<>();
         this.colaTrabajoN2 = new ArrayList<>();
         CPU.colaImprimir1 = new ArrayList<>();
@@ -56,7 +59,7 @@ public class CPU {
         inicializaMemoria();
         inicializarDisco();
         inicializarMemoriaVirtual();
-        configuararHilos();
+        configurarHilos();
     }
     
     private void inicializaMemoria(){
@@ -80,9 +83,44 @@ public class CPU {
     /**
      * Se encarga de llamar a las distintas funciones que controlan la ejecucion de la instrucciones.
      */
-    private void configuararHilos(){
+    private void configurarHilos(){
         configurarHiloColasNucleos();
         configurarHiloMemoriaVirtual();
+        configurarHiloInterrupciones();
+    }
+    
+    /**
+     * Establece la función para el timer timerControlInterrupciones que se encargará de verificar...
+     * si hay interrupciones que ejecutar....
+     */
+    private void configurarHiloInterrupciones(){
+        timerControlInterrupciones = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                // Función que repetirá según el intervalo asignado (1 segundo).
+                controlInterrupciones();
+            }
+        });
+        // Inicializo el timer.
+        timerControlInterrupciones.start();
+    }
+    
+    /**
+     * Verifica si hay interrupciones por ejecutar.
+     */
+    private void controlInterrupciones(){
+        // Si en la lista hay interrupciones y no hay ninguna en ejecución (igual a null)
+        if(CPU.interrupciones.size()>0 && interrupcionEnEjecucion==null){
+            interrupcionEnEjecucion=CPU.interrupciones.remove(0);
+        }
+        // Si hay una interrupción y está completada, se envía al núcleo correspondiente.
+        if(interrupcionEnEjecucion!=null && interrupcionEnEjecucion.obtenerEstado()){
+            if(interrupcionEnEjecucion.obtenerNumeroNucleo()==0){
+                nucleo1.recibirInterrupcion(interrupcionEnEjecucion);
+            }else{
+                nucleo2.recibirInterrupcion(interrupcionEnEjecucion);
+            }interrupcionEnEjecucion=null;
+        }
     }
     
     /**
@@ -143,29 +181,19 @@ public class CPU {
      * @throws InterruptedException 
      */
     private void verificarColas() throws InterruptedException{
-        if(!colaTrabajoN1.isEmpty()){  
-            
-            if(nucleo1.obtenerEstado()){
-               /*int procesoSiguiente= colaTrabajoN1.get(0).numeroBCP;               
-                BCP procesoAEjecutar = obtenerBCP(procesoSiguiente);
-                if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria()){
 
-                    System.out.println("Cola1: "+procesoAEjecutar.obtenerCadenaInstruccionIR());
-                    nucleo1.recibirProceso(procesoAEjecutar);
-                }
-                */
+        if(!colaTrabajoN1.isEmpty()){              
+            if(nucleo1.obtenerEstado()){              
                colaImprimir1.clear();
                BCP procesoAEjecutar = retornarProceso(1);
                listadoColas(1);
                if(colaImprimir1.isEmpty()){
                    colaImprimir1 = new ArrayList<>();              
-               }
-              
+               }             
                procesoCola1++;
                if(procesoAEjecutar!=null){                  
-                   nucleo1.recibirProceso(procesoAEjecutar);
-                   
-               }
+                   nucleo1.recibirProceso(procesoAEjecutar);                  
+               }               
             }
         }
         if(!colaTrabajoN2.isEmpty()){
@@ -178,8 +206,7 @@ public class CPU {
                }
                procesoCola2++;
                if(procesoAEjecutar!=null){                  
-                   nucleo2.recibirProceso(procesoAEjecutar);
-                   
+                   nucleo2.recibirProceso(procesoAEjecutar);                 
                }
             }
         }
@@ -308,6 +335,10 @@ public class CPU {
     
     public List<BCP> obtenerProcesos(){
         return procesos;
+    }
+    
+    public Interrupcion obtenerInterrupcion(){
+        return interrupcionEnEjecucion;
     }
     
     private void verificaProcesos(){
@@ -508,17 +539,7 @@ public class CPU {
                 trabajo=new Trabajo(1, idProcesoNuevo);
                 colaTrabajoN2.add(trabajo);
         }
-        /*if(nucleo==0){
-            for(int i=0;i<numeroInstrucciones;i++){
-                trabajo=new Trabajo(0, idProcesoNuevo);
-                colaTrabajoN1.add(trabajo);
-            }
-        }else{
-            for(int i=0;i<numeroInstrucciones;i++){
-                trabajo=new Trabajo(1, idProcesoNuevo);
-                colaTrabajoN2.add(trabajo);
-            }
-        }*/
+       
     }
     
     /**

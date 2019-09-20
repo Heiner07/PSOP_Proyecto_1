@@ -28,15 +28,17 @@ public class Nucleo {
     private String instruccionIR="";
     private BCP procesoEjecutando=null;
     static int numeroInstrucciones=0;
-    private boolean bandera= false;
+    private int numeroNucleo;
+    private Boolean bandera= false;
     private Boolean ejecutar = false;
+    private Boolean esperaInterrupcion = false; // Indica si el núcleo está a la espera que se complete una interrupción.
     private Timer timerOperacion;
     private int tiempoRestante=1; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
     private Stack < String > parametros = new Stack <> ();
     private int inicioMemoria, finMemoria;
-    private boolean estadoProceso = true;
     private String instrucciones;
-    public Nucleo(){
+    public Nucleo(int numeroNucleo){
+        this.numeroNucleo = numeroNucleo;
         timerOperacion = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -55,7 +57,7 @@ public class Nucleo {
     private void controlEjecucionNucleo(){
         try {
             if(tiempoRestante==0){
-                if(ejecutar){
+                if(ejecutar && !esperaInterrupcion){
                     ejecutar=false;
                     Operaciones();
                 }
@@ -122,8 +124,11 @@ public class Nucleo {
                 decrementar(registro);
                 
                 break;
-            case "1000"://INT 20H
-                
+            case "1000"://INT
+                if(registro.equals("0101")){//20H
+                    esperaInterrupcion=true;
+                    CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.FINALIZAR_PROGRAMA));
+                }
                 break;
             case "1001"://JUMP [+/-Desplazamiento]
                 tiempoRestante=TiempoInstrucciones.JUMP;
@@ -131,10 +136,7 @@ public class Nucleo {
                 if("1".equals(numeroORegistro.substring(0,1))){
                     decimal *= -1;
                     PC -=2;
-                } 
-                                    
-
-                            
+                }           
                 
                 PC += decimal;
                 //tem.out.println("PC: "+PC+" Decimal: "+decimal);
@@ -181,7 +183,10 @@ public class Nucleo {
             default:             
                 break;
         }
-        guardarContexto(); // Guarda el estado en el proceso. (Para que sea reflejado en la interfaz).
+        if(!esperaInterrupcion){
+            // Si el núcleo espera una instrucción, entonces no es necesario guardar el contexto porque no hay cambios.
+            guardarContexto(); // Guarda el estado en el proceso. (Para que sea reflejado en la interfaz).
+        }
     }
     
     public static int registroPosicion(String registro){       
@@ -317,11 +322,8 @@ public class Nucleo {
     }
     
     public Boolean obtenerEstado(){
-        return (tiempoRestante==0);// Si es igual a cero entonces está listo.
-    }
-    public boolean obtenerEstadoProceso(){
-        return estadoProceso;
-    
+        // Si es igual a cero(tiempo de espera) y no espera interrupción, entonces está listo.
+        return (tiempoRestante==0) && !esperaInterrupcion;
     }
     
     /**
@@ -353,19 +355,18 @@ public class Nucleo {
         //System.out.println("PC: "+PC+ " finMemoria: "+procesoEjecutando.obtenerFinMemoria());
         if(PC>procesoEjecutando.obtenerFinMemoria()){
             // Si el pc supera al fin de memoria, entonces se llegó a la última instrucción
-            
             procesoEjecutando.establecerEstado(BCP.TERMINADO);
-            estadoProceso = false;
-            for(int i=inicioMemoria;i<=finMemoria;i++){
-                CPU.memoriaVirtual[i] = "0000 0000 00000000";
-            
-            }
-            
         }// Esto comentado creo solo sería si se implementa multiples procesos al mismo tiempo para un núcleo
         /*else{
             // Si no es el último, entonces se establece en preparado
             procesoEjecutando.establecerEstado(BCP.PREPARADO);
         }*/
+        if(procesoEjecutando.obtenerEstadoProceso()==BCP.TERMINADO){
+            // Si el proceso ha terminado, entonces se limpia la memoria.
+            for(int i=inicioMemoria;i<=finMemoria;i++){
+                CPU.memoriaVirtual[i] = "0000 0000 00000000";
+            }
+        }
         procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC,parametros,instrucciones);
     }
     
@@ -391,7 +392,7 @@ public class Nucleo {
     }
     
     /**
-     * Guarda el contexto (información de la ejecución) del procesos actual(ejeuctandose) y carga...
+     * Guarda el contexto (información de la ejecución) del procesos actual(ejecutandose) y carga...
      * ...el contexto del proceso entrante para realizar las operaciones.
      * @param procesoEntrante 
      */
@@ -401,6 +402,29 @@ public class Nucleo {
             procesoEjecutando.establecerEstado(BCP.EN_ESPERA);
         }      
         establecerContexto(procesoEntrante);
+    }
+    
+    /**
+     * Recibe la interrupción ya finalizada, si es el caso de un input, la interrupción ya trae el dato.
+     * La interrupción se considera finalizada cuando el usuario ya presionó ENTER mediante la interfaz.
+     * @param interrupcion 
+     */
+    public void recibirInterrupcion(Interrupcion interrupcion){
+        int numeroInterrupcion = interrupcion.obtenerNumeroInterrupcion();
+        switch (numeroInterrupcion) {
+            case Interrupcion.FINALIZAR_PROGRAMA:
+                procesoEjecutando.establecerEstado(BCP.TERMINADO); // Se establece el proceso como terminado
+                guardarContexto(); // Se guardan los valores en el proceso.
+                esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
+                break;
+            case Interrupcion.IMPRIMIR:
+                
+                break;
+            case Interrupcion.ENTRADA_TECLADO:
+                break;
+            default:
+                break;
+        }
     }
     
 }
