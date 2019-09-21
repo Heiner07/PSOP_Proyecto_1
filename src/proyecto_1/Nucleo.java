@@ -125,9 +125,22 @@ public class Nucleo {
                 
                 break;
             case "1000"://INT
-                if(registro.equals("0101")){//20H
-                    esperaInterrupcion=true;
-                    CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.FINALIZAR_PROGRAMA));
+                esperaInterrupcion=true;
+                switch (registro) {
+                    case "0101":
+                        //20H
+                        CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.FINALIZAR_PROGRAMA));
+                        break;
+                    case "0110":
+                        //16H
+                        CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.IMPRIMIR, registros[4]));//Imprime registro DX
+                        break;
+                    case "0111":
+                        //05H
+                        CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ENTRADA_TECLADO));// Recibe dato en DX
+                        break;
+                    default:
+                        break;
                 }
                 break;
             case "1001"://JUMP [+/-Desplazamiento]
@@ -418,9 +431,13 @@ public class Nucleo {
                 esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
                 break;
             case Interrupcion.IMPRIMIR:
-                
+                guardarContexto(); // Se guardan los valores en el proceso.
+                esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
                 break;
             case Interrupcion.ENTRADA_TECLADO:
+                registros[4]=interrupcion.obtenerValor();
+                guardarContexto(); // Se guardan los valores en el proceso.
+                esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
                 break;
             default:
                 break;

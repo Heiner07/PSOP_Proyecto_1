@@ -110,11 +110,22 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         if(interrupcion==null){
             if(cpu.obtenerInterrupcion()!=null && !cpu.obtenerInterrupcion().obtenerEstado()){
                 interrupcion=cpu.obtenerInterrupcion();
-                if(interrupcion.obtenerNumeroInterrupcion()==Interrupcion.FINALIZAR_PROGRAMA){
-                    taPantalla.setText(taPantalla.getText()+"Presione ENTER para finalizar el proceso...");
-                    tfConsola.setEnabled(true);
-                    tfConsola.requestFocus();
+                int numeroInterrupcion = interrupcion.obtenerNumeroInterrupcion();
+                switch (numeroInterrupcion) {
+                    case Interrupcion.FINALIZAR_PROGRAMA:
+                        taPantalla.setText(taPantalla.getText()+"Presione ENTER para finalizar el proceso...");
+                        break;
+                    case Interrupcion.IMPRIMIR:
+                        taPantalla.setText(taPantalla.getText()+interrupcion.obtenerValor()+"\nPresione ENTER para continuar...");
+                        break;
+                    case Interrupcion.ENTRADA_TECLADO:
+                        taPantalla.setText(taPantalla.getText()+"Ingrese el valor: ");
+                        break;
+                    default:
+                        break;
                 }
+                tfConsola.setEnabled(true);
+                tfConsola.requestFocus();
             }
         }
     }
@@ -349,6 +360,20 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     private void limpiarProcesosInterfaz(){
         panelBCPs.removeAll();
         BCPs.clear();
+    }
+    
+    private Boolean esNumero(String valor){
+        if(!valor.equals("")){
+            int largo = valor.length();
+            for(int i=0; i<largo; i++){
+                char caracter = valor.charAt(i);
+                if(caracter<'0' || caracter>'9'){
+                    return false;
+                }
+            }
+        }else{
+            return false;
+        }return true;
     }
 
     /**
@@ -1232,10 +1257,24 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     private void tfConsolaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfConsolaKeyTyped
         /* Se encarga de detectar el enter en el campo de texto consola y establece la interrupción como completa*/
         if(evt.getKeyChar()=='\n'){
-            taPantalla.setText(taPantalla.getText()+"\n");
-            tfConsola.setEnabled(false);
-            interrupcion.establecerComoEjecutada();
-            interrupcion=null;
+            Boolean bloquear=true;
+            if(interrupcion.obtenerNumeroInterrupcion()==Interrupcion.ENTRADA_TECLADO){
+                String valor = tfConsola.getText();
+                Boolean esNumero = esNumero(valor);
+                if(esNumero){
+                    interrupcion.establecerValor(Integer.valueOf(valor));
+                }
+                bloquear=esNumero;
+            }
+            if(bloquear){
+                taPantalla.setText(taPantalla.getText()+tfConsola.getText()+"\n");
+                tfConsola.setText("");
+                tfConsola.setEnabled(false);
+                interrupcion.establecerComoEjecutada();
+                interrupcion=null;
+            }else{
+                taPantalla.setText(taPantalla.getText()+tfConsola.getText()+"\nNo es un Número.\n");
+            }
         }
     }//GEN-LAST:event_tfConsolaKeyTyped
 
