@@ -7,7 +7,8 @@ package proyecto_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.Timer;
 
 /**
@@ -31,12 +32,12 @@ public class BCP {
     private Timer timer;
     private int segundos;
     private String instruccionIR;
-    private Stack < String > parametros = new Stack <> ();
+    private List<String> parametros = new ArrayList<>();
     //Limites de memoria
     private int inicioMemoria, finMemoria;
     private String instrucciones;
     
-    public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria, int nucleo,Stack<String> parametros ){
+    public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria, int nucleo, List<String> parametros){
         this.AX=0;
         this.BX=0;
         this.CX=0;
@@ -46,10 +47,10 @@ public class BCP {
         this.instruccionIR="";
         this.estadoProceso=estadoProceso;
         this.numeroProceso=numeroProceso;
-        this.direccionPila=0;
+        this.direccionPila=inicioMemoria-1; // Menos uno, ya que cuando hace push aumenta en uno apuntando al inicio.
         this.inicioMemoria=inicioMemoria;
         this.finMemoria=finMemoria;
-        this.PC=inicioMemoria;
+        this.PC=inicioMemoria+CPU.LARGOPILA;// Se reserva este espacio para la pila
         this.nucleo=nucleo;
         this.segundos=0;     
         this.parametros = parametros;
@@ -72,7 +73,7 @@ public class BCP {
         }
     }
     
-    public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC, int PC,Stack<String> parametros,String instrucciones  ){
+    public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC, int PC,String instrucciones  ){
         this.AX=AX;
         this.BX=BX;
         this.CX=CX;
@@ -80,7 +81,6 @@ public class BCP {
         this.IR=IR;
         this.AC=AC;
         this.PC=PC;
-        this.parametros = parametros;
         this.instrucciones = instrucciones;
        
     }
@@ -90,7 +90,7 @@ public class BCP {
     public int obtenerNumeroProceso(){
         return numeroProceso;
     }
-    public Stack <String> obtenerParametros(){
+    public List<String> obtenerParametros(){
         return parametros;
     
     }
@@ -105,6 +105,14 @@ public class BCP {
     
     public int obtenerDireccionpila(){
         return direccionPila;
+    }
+    
+    public int pushPila(){
+        return ++direccionPila;
+    }
+    
+    public int popPila(){
+        return direccionPila--;
     }
     
     public int obtenerInicioMemoria(){

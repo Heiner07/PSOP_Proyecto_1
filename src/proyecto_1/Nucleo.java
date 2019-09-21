@@ -7,6 +7,7 @@ package proyecto_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +35,6 @@ public class Nucleo {
     private Boolean esperaInterrupcion = false; // Indica si el núcleo está a la espera que se complete una interrupción.
     private Timer timerOperacion;
     private int tiempoRestante=1; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
-    private Stack < String > parametros = new Stack <> ();
     private int inicioMemoria, finMemoria;
     private String instrucciones;
     public Nucleo(int numeroNucleo){
@@ -192,7 +192,11 @@ public class Nucleo {
                 tiempoRestante=TiempoInstrucciones.POP;
                 popRegistro(registro);
                 
-                break;          
+                break;
+            case "1111"://PARAM
+                tiempoRestante=TiempoInstrucciones.PARAM;
+                parametrosAPila();
+                break;
             default:             
                 break;
         }
@@ -297,12 +301,25 @@ public class Nucleo {
     
     public void popRegistro(String registro){
 //        System.out.println(Arrays.toString(parametros.toArray()));
-        if(!parametros.empty()){
-            registros[(registroPosicion(registro))] = Integer.parseInt(parametros.pop());      
-        }
-    
-    
+        //if(!parametros.empty()){
+            registros[(registroPosicion(registro))] = binarioADecimal(CPU.memoriaVirtual[procesoEjecutando.popPila()].split(" ")[2]);
+        //}
     }
+    
+    private void parametrosAPila(){
+        // Obtengo los parámetros del proceso
+        List<String> parametrosTemp = procesoEjecutando.obtenerParametros();
+        int numeroParametros = parametrosTemp.size();
+        if(numeroParametros<11){// Si es menor a 11, entonces caben en la pila.
+            for(int i=numeroParametros-1; i>-1;i--){// Agrego los parámetros a la sección de la memoria usada como pila
+                CPU.memoriaVirtual[procesoEjecutando.pushPila()]="1111 0000 "+
+                        decimalABinaro(Integer.valueOf(parametrosTemp.get(i)));
+            }
+        }else{// Si no indico el error
+
+        }
+    }
+    
     public String decimalABinaro(int a) {
         boolean negativo = false;
         if(a<0){
@@ -316,6 +333,18 @@ public class Nucleo {
         }
         if(negativo){temp="1"+temp;}else{temp="0"+temp;}
         return temp;
+    }
+    
+    private int binarioADecimal(String binario){
+        int numeroDecimal=0;
+        int largoBinario = binario.length();
+        int potencia = largoBinario-1;
+        for(int i=0;i<largoBinario;i++){
+            if(binario.charAt(i)=='1'){
+                numeroDecimal += 1 * Math.pow(2, potencia);
+            }potencia--;
+        }
+        return numeroDecimal;
     }
     
     public int obtenerPC(){
@@ -380,7 +409,7 @@ public class Nucleo {
                 CPU.memoriaVirtual[i] = "0000 0000 00000000";
             }
         }
-        procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC,parametros,instrucciones);
+        procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC,instrucciones);
     }
     
     /**
@@ -390,7 +419,6 @@ public class Nucleo {
      */
     private void establecerContexto(BCP procesoEntrante){
         int[] registrosProceso=procesoEntrante.obtenerRegistros();
-        parametros = procesoEntrante.obtenerParametros();
         registros[0]=registrosProceso[5];
         registros[1]=registrosProceso[0];
         registros[2]=registrosProceso[1];

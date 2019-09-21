@@ -12,9 +12,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import static java.util.Collections.reverse;
 import java.util.List;
-import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
@@ -29,6 +29,7 @@ public class CPU {
     static final int LARGOMEMORIA = 128;
     static final int LARGODISCO = 1024;
     static final int LARGOMEMORIAVIRTUAL = LARGOMEMORIA+LARGODISCO/2;
+    static final int LARGOPILA = 10;
     static String[] memoriaVirtual = new String[LARGOMEMORIAVIRTUAL];
     static String[] memoria = new String[LARGOMEMORIA];
     static String[] disco = new String[LARGODISCO];
@@ -308,15 +309,6 @@ public class CPU {
         
     }
     
-   
-        
-    
-    
-    
-    public String[] obtenerParametros(){
-        return parametros;
-    
-    }
     public Nucleo obtenerNucleo1(){
         return nucleo1;
     }
@@ -383,21 +375,23 @@ public class CPU {
     
     /**
      * Crea un proceso para la lista de instrucciones indicadas.
-     * Si hay espacio para crear un bloque se agregan a memoria, sino se pone a la espera.
-     * @param instrucciones 
+     * Si hay espacio para crear un bloque se agregan a memoria, sino se pone a la espera. 
+     * @param instruccionesTemp
      */
-    public void crearProceso(List<String> instrucciones){
+    public void crearProceso(List<String> instruccionesTemp){
         String[] obtenerParametros;
-        Stack < String > pila = new Stack <> ();
-       
-        obtenerParametros = instrucciones.get(0).split(" ");
-        if(obtenerParametros[0].equals("PARAM")){              
-            parametros = obtenerParametros[1].split(",");  
-            for (String parametro : parametros) {
-                pila.push(parametro);
+        List<String> pila = new ArrayList<>();
+        List<String> instrucciones = new ArrayList<>();
+        obtenerParametros = instruccionesTemp.get(0).split(" ");
+        if(obtenerParametros[0].equals("PARAM")){   
+            // Si tiene parámetros, entonces "inicializo" la sección de memoria a usar como pila.
+            parametros = obtenerParametros[1].split(",");//Obtengo los parámetros
+            pila.addAll(Arrays.asList(parametros));//Los agrego a la pila temporal que se pasará al proceso.
+            for(int i=0;i<10;i++){
+                instrucciones.add("PARAM 0");//Se "inicializa" la posición (Las 10 primeras del proceso).
             }
-            instrucciones.remove(0);
         }
+        instrucciones.addAll(instruccionesTemp);// Se agregan las instrucciones después de la sección de Pila (si existe).
         int numeroInstrucciones=instrucciones.size();
         //if(tieneParametros)numeroInstrucciones-=1;
         
@@ -507,7 +501,9 @@ public class CPU {
             case "16H":
                 return "0110";
             case "05H":
-                return "0111";               
+                return "0111";
+            case "PARAM":
+                return "1111";
             default:
                 return "0000";
         }    
