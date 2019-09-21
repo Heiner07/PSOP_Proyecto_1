@@ -5,6 +5,8 @@
  */
 package proyecto_1;
 
+import java.awt.Color;
+
 /**
  *
  * @author Heiner
@@ -19,10 +21,12 @@ public class JPBCP extends javax.swing.JPanel {
      * @param inicioMemoria
      * @param finMemoria
      * @param tiempoEjecucion
+     * @param IR
+     * @param nucleo
      * @param registros
      */
     public JPBCP(int numeroProceso, int estadoProceso, int direccionPila,
-            int inicioMemoria, int finMemoria, int tiempoEjecucion, String IR, int[] registros) {
+            int inicioMemoria, int finMemoria, int tiempoEjecucion, String IR, int nucleo, int[] registros) {
         initComponents();
         this.lbNumeroProceso.setText(String.valueOf(numeroProceso));
         this.lbEstadoProceso.setText(BCP.estadoProcesoCadena(estadoProceso));
@@ -31,7 +35,44 @@ public class JPBCP extends javax.swing.JPanel {
         this.lbFinMemoria.setText(String.valueOf(finMemoria));
         this.lbTiempoEjecucion.setText(String.valueOf(tiempoEjecucion));
         this.lbIR.setText(IR);
+        configurarColoresRegistros(nucleo);
+        if(estadoProceso==BCP.NUEVO){
+            lbEstadoProceso.setBackground(Color.RED);
+            lbEstadoProceso.setForeground(Color.WHITE);
+        }else if(estadoProceso==BCP.PREPARADO){
+            lbEstadoProceso.setBackground(Color.BLUE);
+            lbEstadoProceso.setForeground(Color.WHITE);
+        }else if(estadoProceso==BCP.EN_EJECUCION){
+            lbEstadoProceso.setBackground(Color.GREEN);
+        }else if(estadoProceso==BCP.EN_ESPERA){
+            lbEstadoProceso.setBackground(Color.YELLOW);
+        }else{
+            lbEstadoProceso.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
+        }
         establecerRegistros(registros);
+    }
+    
+    private void configurarColoresRegistros(int nucleo){
+        if(nucleo==0){
+            jpRegistros.setBackground(Colores.nucleo1);
+            lbRegistrosTitulo.setForeground(Colores.fuenteNucleo1);
+            lbPC.setForeground(Colores.fuenteNucleo1);
+            lbPCTitulo.setForeground(Colores.fuenteNucleo1);
+            lbAX.setForeground(Colores.fuenteNucleo1);
+            lbAXTitulo.setForeground(Colores.fuenteNucleo1);
+            lbBX.setForeground(Colores.fuenteNucleo1);
+            lbBXTitulo.setForeground(Colores.fuenteNucleo1);
+            lbCX.setForeground(Colores.fuenteNucleo1);
+            lbCXTitulo.setForeground(Colores.fuenteNucleo1);
+            lbDX.setForeground(Colores.fuenteNucleo1);
+            lbDXTitulo.setForeground(Colores.fuenteNucleo1);
+            lbAC.setForeground(Colores.fuenteNucleo1);
+            lbACTitulo.setForeground(Colores.fuenteNucleo1);
+            lbIR.setForeground(Colores.fuenteNucleo1);
+            lbIRTitulo.setForeground(Colores.fuenteNucleo1);
+        }else{
+            jpRegistros.setBackground(Colores.nucleo2);
+        }
     }
     
     public void establecerEstadoProceso(String estado){
@@ -73,21 +114,21 @@ public class JPBCP extends javax.swing.JPanel {
         lbFinMemoria = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         lbTiempoEjecucion = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel13 = new javax.swing.JLabel();
-        jLabel15 = new javax.swing.JLabel();
+        jpRegistros = new javax.swing.JPanel();
+        lbRegistrosTitulo = new javax.swing.JLabel();
+        lbPCTitulo = new javax.swing.JLabel();
         lbPC = new javax.swing.JLabel();
         lbAC = new javax.swing.JLabel();
-        jLabel18 = new javax.swing.JLabel();
-        jLabel19 = new javax.swing.JLabel();
+        lbACTitulo = new javax.swing.JLabel();
+        lbAXTitulo = new javax.swing.JLabel();
         lbAX = new javax.swing.JLabel();
-        jLabel21 = new javax.swing.JLabel();
+        lbBXTitulo = new javax.swing.JLabel();
         lbBX = new javax.swing.JLabel();
-        jLabel23 = new javax.swing.JLabel();
+        lbCXTitulo = new javax.swing.JLabel();
         lbCX = new javax.swing.JLabel();
-        jLabel25 = new javax.swing.JLabel();
+        lbDXTitulo = new javax.swing.JLabel();
         lbDX = new javax.swing.JLabel();
-        jLabel27 = new javax.swing.JLabel();
+        lbIRTitulo = new javax.swing.JLabel();
         lbIR = new javax.swing.JLabel();
 
         setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -113,9 +154,11 @@ public class JPBCP extends javax.swing.JPanel {
         jLabel3.setPreferredSize(new java.awt.Dimension(115, 15));
 
         lbEstadoProceso.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        lbEstadoProceso.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lbEstadoProceso.setText("0");
         lbEstadoProceso.setMaximumSize(new java.awt.Dimension(115, 15));
         lbEstadoProceso.setMinimumSize(new java.awt.Dimension(115, 15));
+        lbEstadoProceso.setOpaque(true);
         lbEstadoProceso.setPreferredSize(new java.awt.Dimension(115, 15));
 
         jLabel5.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
@@ -170,20 +213,20 @@ public class JPBCP extends javax.swing.JPanel {
         lbTiempoEjecucion.setMinimumSize(new java.awt.Dimension(115, 15));
         lbTiempoEjecucion.setPreferredSize(new java.awt.Dimension(115, 15));
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jpRegistros.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jLabel13.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jLabel13.setText("Registros");
-        jLabel13.setMaximumSize(new java.awt.Dimension(115, 15));
-        jLabel13.setMinimumSize(new java.awt.Dimension(115, 15));
-        jLabel13.setPreferredSize(new java.awt.Dimension(115, 15));
+        lbRegistrosTitulo.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        lbRegistrosTitulo.setText("Registros");
+        lbRegistrosTitulo.setMaximumSize(new java.awt.Dimension(115, 15));
+        lbRegistrosTitulo.setMinimumSize(new java.awt.Dimension(115, 15));
+        lbRegistrosTitulo.setPreferredSize(new java.awt.Dimension(115, 15));
 
-        jLabel15.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel15.setText("PC:");
-        jLabel15.setMaximumSize(new java.awt.Dimension(115, 15));
-        jLabel15.setMinimumSize(new java.awt.Dimension(115, 15));
-        jLabel15.setPreferredSize(new java.awt.Dimension(57, 15));
+        lbPCTitulo.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        lbPCTitulo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbPCTitulo.setText("PC:");
+        lbPCTitulo.setMaximumSize(new java.awt.Dimension(115, 15));
+        lbPCTitulo.setMinimumSize(new java.awt.Dimension(115, 15));
+        lbPCTitulo.setPreferredSize(new java.awt.Dimension(57, 15));
 
         lbPC.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lbPC.setText("0");
@@ -197,19 +240,19 @@ public class JPBCP extends javax.swing.JPanel {
         lbAC.setMinimumSize(new java.awt.Dimension(115, 15));
         lbAC.setPreferredSize(new java.awt.Dimension(57, 15));
 
-        jLabel18.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel18.setText("AC:");
-        jLabel18.setMaximumSize(new java.awt.Dimension(115, 15));
-        jLabel18.setMinimumSize(new java.awt.Dimension(115, 15));
-        jLabel18.setPreferredSize(new java.awt.Dimension(57, 15));
+        lbACTitulo.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        lbACTitulo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbACTitulo.setText("AC:");
+        lbACTitulo.setMaximumSize(new java.awt.Dimension(115, 15));
+        lbACTitulo.setMinimumSize(new java.awt.Dimension(115, 15));
+        lbACTitulo.setPreferredSize(new java.awt.Dimension(57, 15));
 
-        jLabel19.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jLabel19.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel19.setText("AX:");
-        jLabel19.setMaximumSize(new java.awt.Dimension(115, 15));
-        jLabel19.setMinimumSize(new java.awt.Dimension(115, 15));
-        jLabel19.setPreferredSize(new java.awt.Dimension(57, 15));
+        lbAXTitulo.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        lbAXTitulo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbAXTitulo.setText("AX:");
+        lbAXTitulo.setMaximumSize(new java.awt.Dimension(115, 15));
+        lbAXTitulo.setMinimumSize(new java.awt.Dimension(115, 15));
+        lbAXTitulo.setPreferredSize(new java.awt.Dimension(57, 15));
 
         lbAX.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lbAX.setText("0");
@@ -217,12 +260,12 @@ public class JPBCP extends javax.swing.JPanel {
         lbAX.setMinimumSize(new java.awt.Dimension(115, 15));
         lbAX.setPreferredSize(new java.awt.Dimension(57, 15));
 
-        jLabel21.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jLabel21.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel21.setText("BX:");
-        jLabel21.setMaximumSize(new java.awt.Dimension(115, 15));
-        jLabel21.setMinimumSize(new java.awt.Dimension(115, 15));
-        jLabel21.setPreferredSize(new java.awt.Dimension(57, 15));
+        lbBXTitulo.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        lbBXTitulo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbBXTitulo.setText("BX:");
+        lbBXTitulo.setMaximumSize(new java.awt.Dimension(115, 15));
+        lbBXTitulo.setMinimumSize(new java.awt.Dimension(115, 15));
+        lbBXTitulo.setPreferredSize(new java.awt.Dimension(57, 15));
 
         lbBX.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lbBX.setText("0");
@@ -230,12 +273,12 @@ public class JPBCP extends javax.swing.JPanel {
         lbBX.setMinimumSize(new java.awt.Dimension(115, 15));
         lbBX.setPreferredSize(new java.awt.Dimension(57, 15));
 
-        jLabel23.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jLabel23.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel23.setText("CX:");
-        jLabel23.setMaximumSize(new java.awt.Dimension(115, 15));
-        jLabel23.setMinimumSize(new java.awt.Dimension(115, 15));
-        jLabel23.setPreferredSize(new java.awt.Dimension(57, 15));
+        lbCXTitulo.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        lbCXTitulo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbCXTitulo.setText("CX:");
+        lbCXTitulo.setMaximumSize(new java.awt.Dimension(115, 15));
+        lbCXTitulo.setMinimumSize(new java.awt.Dimension(115, 15));
+        lbCXTitulo.setPreferredSize(new java.awt.Dimension(57, 15));
 
         lbCX.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lbCX.setText("0");
@@ -243,12 +286,12 @@ public class JPBCP extends javax.swing.JPanel {
         lbCX.setMinimumSize(new java.awt.Dimension(115, 15));
         lbCX.setPreferredSize(new java.awt.Dimension(57, 15));
 
-        jLabel25.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jLabel25.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel25.setText("DX:");
-        jLabel25.setMaximumSize(new java.awt.Dimension(115, 15));
-        jLabel25.setMinimumSize(new java.awt.Dimension(115, 15));
-        jLabel25.setPreferredSize(new java.awt.Dimension(57, 15));
+        lbDXTitulo.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        lbDXTitulo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbDXTitulo.setText("DX:");
+        lbDXTitulo.setMaximumSize(new java.awt.Dimension(115, 15));
+        lbDXTitulo.setMinimumSize(new java.awt.Dimension(115, 15));
+        lbDXTitulo.setPreferredSize(new java.awt.Dimension(57, 15));
 
         lbDX.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lbDX.setText("0");
@@ -256,12 +299,12 @@ public class JPBCP extends javax.swing.JPanel {
         lbDX.setMinimumSize(new java.awt.Dimension(115, 15));
         lbDX.setPreferredSize(new java.awt.Dimension(57, 15));
 
-        jLabel27.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jLabel27.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel27.setText("IR:");
-        jLabel27.setMaximumSize(new java.awt.Dimension(115, 15));
-        jLabel27.setMinimumSize(new java.awt.Dimension(115, 15));
-        jLabel27.setPreferredSize(new java.awt.Dimension(57, 15));
+        lbIRTitulo.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        lbIRTitulo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbIRTitulo.setText("IR:");
+        lbIRTitulo.setMaximumSize(new java.awt.Dimension(115, 15));
+        lbIRTitulo.setMinimumSize(new java.awt.Dimension(115, 15));
+        lbIRTitulo.setPreferredSize(new java.awt.Dimension(57, 15));
 
         lbIR.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lbIR.setText("0");
@@ -269,73 +312,73 @@ public class JPBCP extends javax.swing.JPanel {
         lbIR.setMinimumSize(new java.awt.Dimension(115, 15));
         lbIR.setPreferredSize(new java.awt.Dimension(57, 15));
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout jpRegistrosLayout = new javax.swing.GroupLayout(jpRegistros);
+        jpRegistros.setLayout(jpRegistrosLayout);
+        jpRegistrosLayout.setHorizontalGroup(
+            jpRegistrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jpRegistrosLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel27, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jpRegistrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jpRegistrosLayout.createSequentialGroup()
+                        .addComponent(lbIRTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lbIR, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jpRegistrosLayout.createSequentialGroup()
+                        .addGroup(jpRegistrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lbRegistrosTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jpRegistrosLayout.createSequentialGroup()
+                                .addComponent(lbPCTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lbPC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lbACTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lbAC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jpRegistrosLayout.createSequentialGroup()
+                                .addComponent(lbAXTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lbAX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lbBXTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lbBX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jpRegistrosLayout.createSequentialGroup()
+                                .addComponent(lbCXTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lbCX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lbDXTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lbDX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        jpRegistrosLayout.setVerticalGroup(
+            jpRegistrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jpRegistrosLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lbRegistrosTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jpRegistrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lbPCTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lbPC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lbACTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lbAC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jpRegistrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lbAXTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lbAX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lbBXTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lbBX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jpRegistrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lbCXTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lbCX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lbDXTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lbDX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel27, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jpRegistrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lbIRTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lbIR, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -374,7 +417,7 @@ public class JPBCP extends javax.swing.JPanel {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lbTiempoEjecucion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 14, Short.MAX_VALUE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jpRegistros, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -405,7 +448,7 @@ public class JPBCP extends javax.swing.JPanel {
                     .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lbTiempoEjecucion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jpRegistros, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -414,31 +457,31 @@ public class JPBCP extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel25;
-    private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jpRegistros;
     private javax.swing.JLabel lbAC;
+    private javax.swing.JLabel lbACTitulo;
     private javax.swing.JLabel lbAX;
+    private javax.swing.JLabel lbAXTitulo;
     private javax.swing.JLabel lbBX;
+    private javax.swing.JLabel lbBXTitulo;
     private javax.swing.JLabel lbCX;
+    private javax.swing.JLabel lbCXTitulo;
     private javax.swing.JLabel lbDX;
+    private javax.swing.JLabel lbDXTitulo;
     private javax.swing.JLabel lbDireccionPila;
     private javax.swing.JLabel lbEstadoProceso;
     private javax.swing.JLabel lbFinMemoria;
     private javax.swing.JLabel lbIR;
+    private javax.swing.JLabel lbIRTitulo;
     private javax.swing.JLabel lbInicioMemoria;
     private javax.swing.JLabel lbNumeroProceso;
     private javax.swing.JLabel lbPC;
+    private javax.swing.JLabel lbPCTitulo;
+    private javax.swing.JLabel lbRegistrosTitulo;
     private javax.swing.JLabel lbTiempoEjecucion;
     // End of variables declaration//GEN-END:variables
 }

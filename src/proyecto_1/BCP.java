@@ -135,6 +135,10 @@ public class BCP {
         return instruccionIR;
     }
     
+    public int obtenerNucleo(){
+        return nucleo;
+    }
+    
     /**
      * Recibe el estado del proceso como entero y devuelve la cadena(String) equivalente al estado recibido
      * @param estadoProceso
