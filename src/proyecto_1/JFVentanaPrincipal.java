@@ -16,10 +16,7 @@ import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
-/**
- *
- * @author Heiner
- */
+
 public class JFVentanaPrincipal extends javax.swing.JFrame {
     
     int paso;

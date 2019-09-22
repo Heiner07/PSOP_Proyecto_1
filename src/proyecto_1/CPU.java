@@ -234,9 +234,7 @@ public class CPU {
         for(int i=0;i<procesos.size();i++){        
             BCP proc = procesos.get(i);
             if(proc.obtenerInicioMemoria() == -1 && (proc.obtenerEstadoProceso()==BCP.NUEVO)){
-                System.out.println("Proceso: "+proc.obtenerNumeroProceso());
                 int[] finInicioMemoria = determinarPosicionesMemoria(proc.obtenerInstruccionesMemoria().size());
-                System.out.println("CAMBIO");
                 if(finInicioMemoria[0] != -1){
                     // Si hay espacio, entonces sí se cargar las instrucciones en memoria.
                     cargarInstrucciones(finInicioMemoria[0],finInicioMemoria[1],proc.obtenerInstruccionesMemoria());
@@ -250,7 +248,12 @@ public class CPU {
         }//SALE FOR
     
     }
-    
+   
+    /**
+     * Se encarga de retornar el BCP del proceso que se va a ejecutar en el núcleo
+     * Con respecto a numeroCola que ingresa ya sea 1 o 2
+     * @param numeroCola
+     * @return  un BCP*/
     public BCP retornarProceso(int numeroCola){
         if(numeroCola == 1){
             int largoCola = colaTrabajoN1.size()-1;
@@ -263,41 +266,36 @@ public class CPU {
                 proc = colaTrabajoN1.get(procesoCola1).numeroBCP;
                 BCP procesoAEjecutar = obtenerBCP(proc);
                 if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
-                    return procesoAEjecutar;
-                    
-                }
-                              
-            }  
-           
+                    return procesoAEjecutar;                   
+                }                             
+            }           
         }else{
             int largoCola = colaTrabajoN2.size()-1;           
             if(procesoCola2 > largoCola){
                procesoCola2 = 0;          
-            }         
-           
+            }                   
             int proc;
             for(;procesoCola2<=largoCola;procesoCola2++){
                 proc = colaTrabajoN2.get(procesoCola2).numeroBCP;
                 BCP procesoAEjecutar = obtenerBCP(proc);
                 if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
-                    return procesoAEjecutar;
-                    
-                }
-                              
+                    return procesoAEjecutar;                  
+                }                            
             }  
         }//SALE ELSE
         return null;
     }
     
-    
+    /**
+     *Entra como parametro el número de cola, se encarga
+     * de llenar las colas de trabajo con sus respectivos procesos
+     * e instrucciones que se van a ejecutar
+     * @param numeroCola
+     */
     public void listadoColas(int numeroCola){
         Trabajo trabajo;
-        
-        
         int numProceso;
-        
-        if(numeroCola == 1){
-            
+        if(numeroCola == 1){           
             numProceso = procesoCola1;
             int largoCola = colaTrabajoN1.size()-1;          
             if(numProceso > largoCola){
@@ -309,14 +307,10 @@ public class CPU {
                 BCP procesoAEjecutar = obtenerBCP(proc);
                 if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
                     trabajo=new Trabajo(0, proc,memoriaVirtual[procesoAEjecutar.obtenerPC()]);
-                    colaImprimir1.add(trabajo);
-                    
-                }
-                              
-            }  
-           
-        }else{
-           
+                    colaImprimir1.add(trabajo);                   
+                }                             
+            }            
+        }else{          
             numProceso = procesoCola2;
             int largoCola = colaTrabajoN2.size()-1;          
             if(numProceso > largoCola){
@@ -328,15 +322,10 @@ public class CPU {
                 BCP procesoAEjecutar = obtenerBCP(proc);          
                 if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
                     trabajo=new Trabajo(1, proc,memoriaVirtual[procesoAEjecutar.obtenerPC()]);
-                    colaImprimir2.add(trabajo);
-                    
-                }
-                              
-            }
-        
-        
-        }//SALE ELSE
-        
+                    colaImprimir2.add(trabajo);                   
+                }                              
+            }              
+        }//SALE ELSE       
     }
     
     public Nucleo obtenerNucleo1(){
@@ -361,11 +350,7 @@ public class CPU {
     
     public Interrupcion obtenerInterrupcion(){
         return interrupcionEnEjecucion;
-    }
-    
-    
-    
-    
+    } 
     private BCP obtenerBCP(int numeroBCP){
         int numeroProcesos = procesos.size();
         BCP proceso;
@@ -445,14 +430,10 @@ public class CPU {
     private void cargarInstrucciones(int inicioMemoria, int finMemoria, List<String> instrucciones){
         String[] parteOperacion,parteResto;
         String instruccionEnbits;
-
-
         // Utilizo inicio de memoria como mi indice para moverme en la memoria, por eso lo aumento
-
         for(int i=0; inicioMemoria<=finMemoria; inicioMemoria++,i++){
             parteOperacion = instrucciones.get(i).split(" ");
-            instruccionEnbits = parteOperacion[0];
-           
+            instruccionEnbits = parteOperacion[0];          
             if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
                  if(parteOperacion.length == 2){
                     CPU.memoriaVirtual[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
@@ -481,6 +462,10 @@ public class CPU {
         }
     }
     
+    /**
+     * Se encarga de pasar los registros en String a binario para rellenar la memoria
+     * retorna el string en binario del string correspondiente.
+    **/
     private String toBinario(String registro){      
         switch(registro) {
             case "AX"://AX                    
@@ -490,8 +475,7 @@ public class CPU {
             case "CX"://CX
                 return "0011";
             case "DX"://DX
-               return "0100";   
-               
+               return "0100";                  
             case "LOAD"://LOAD
                return "0001";
             case "STORE"://STORE
@@ -531,6 +515,10 @@ public class CPU {
         }    
     }
     
+    /**
+     * Se encarga de pasar los números de decimal a binario.
+     * retorna el string del número en binario
+     */
     private String decimalABinaro(int a) {
         boolean negativo = false;
         if(a<0){
@@ -569,32 +557,17 @@ public class CPU {
      * @param memoriaRequerida
      * @return int[]
      */
-    // Falta considerar que puede haber un solo bloque, pero no empieza en la posicion cero.
     @SuppressWarnings("empty-statement")
     public int[] determinarPosicionesMemoria(int memoriaRequerida){
-        System.out.println("Memoria requerida: "+memoriaRequerida);
-        int numeroProcesos = procesos.size();
         int inicioMemoria = -1, finMemoria = -1;
-        int finMemoriaTemp = -1; // Almacena el fin de memoria del proceso anterior
-        Boolean hayEspacio = false;
-        BCP proceso;
-        /* Recorro todos los procesos, bajo el supuesto de que están ordenados de acuerdo a la memoria.
-        *  Entiendase por ordenado como: el inicio de memoria del bloque siguiente es el más cercano...
-        *  ...con respecto al fin de memoria del bloque anterior.
+        Boolean hayEspacio = false;      
+        /* 
+        * Se recorre toda la memoria en busca de una posición de memoria...
+        * en la que no se encuentre ningúnas instrucción, a partir de ahí sigue
+        * recorriendo hasta encontrar la memoria requerida por el proceso.
         */
         
-        for(int i=0;i<CPU.LARGOMEMORIAVIRTUAL;i++){
-           /* proceso=procesos.get(i);
-            if(finMemoria!=-1){
-                if(proceso.obtenerFinMemoria()-finMemoriaTemp>=memoriaRequerida+1){
-                    inicioMemoria=finMemoriaTemp+1;
-                    finMemoria=proceso.obtenerFinMemoria()-1;
-                   
-                    hayEspacio=true;
-                    break;
-                }
-            }finMemoriaTemp=proceso.obtenerFinMemoria();
-            */
+        for(int i=0;i<CPU.LARGOMEMORIAVIRTUAL;i++){        
            if(!hayEspacio){
                 if(CPU.memoriaVirtual[i].equals("0000 0000 00000000")){
                     int memoriaAcumulada=0;
@@ -617,23 +590,12 @@ public class CPU {
            }//SALE IF
            else break;
            
-        }
-        System.out.println("inicio: "+inicioMemoria + " fin: "+finMemoria);
+        }      
         if(hayEspacio){
             // Si hay espacio, retorno las posiciones encontradas.
             return new int[]{inicioMemoria, finMemoria};
-        }else{
-            /*// Si no hay espacio según lo anterior, pueden pasar tres cosas:
-            if(numeroProcesos==0 && memoriaRequerida<CPU.LARGOMEMORIAVIRTUAL){
-                // No hay bloques y el programa cabe en memoria
-                return new int[]{0, memoriaRequerida-1};
-            }else if(CPU.LARGOMEMORIAVIRTUAL-finMemoriaTemp>=memoriaRequerida+1){
-                // Hay espacio después del ultimo bloque.
-                return new int[]{finMemoriaTemp+1, finMemoriaTemp+memoriaRequerida};
-            }else{*/
-                // No hay espacio para el bloque
-                return new int[]{ -1,-1};
-            
+        }else{            
+                return new int[]{ -1,-1};           
             }
     }
     

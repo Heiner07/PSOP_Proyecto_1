@@ -7,12 +7,8 @@ package proyecto_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import java.util.Stack;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.Timer;
 
 /**
@@ -57,7 +53,7 @@ public class BCP {
         this.direccionPila=inicioMemoria-1; // Menos uno, ya que cuando hace push aumenta en uno apuntando al inicio.
         this.inicioMemoria=inicioMemoria;
         this.finMemoria=finMemoria;
-        if(parametros.size()>0){
+        if(parametros.size()>0){//verifico que hayan parametros en el proceso entrante
             this.PC=inicioMemoria+CPU.LARGOPILA;// Se reserva este espacio para la pila
         
         }
@@ -75,6 +71,15 @@ public class BCP {
         });
         this.timer.start();
     }
+    
+    /**
+     * Se encarga de actualizar los datos del proceso, en caso de que...
+     * no haya encontrado espacio en memoria. Cuando encuentra espacio en memoria...
+     * se llama este método para actualizar los datos respectivos e iniciar su ejecución.
+     * @param estadoProceso
+     * @param inicioMemoria
+     * @param finMemoria
+     **/
     public void actualizarProceso(int estadoProceso,int inicioMemoria, int finMemoria){
         this.estadoProceso=estadoProceso;
         this.inicioMemoria = inicioMemoria;
