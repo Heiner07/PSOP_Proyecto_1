@@ -13,7 +13,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import static java.util.Collections.reverse;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -414,12 +413,9 @@ public class CPU {
             }
             
         }
-       
-        
         
         instrucciones.addAll(instruccionesTemp);// Se agregan las instrucciones después de la sección de Pila (si existe).
         int numeroInstrucciones=instrucciones.size();
-        //if(tieneParametros)numeroInstrucciones-=1;
         
         int[] finInicioMemoria=determinarPosicionesMemoria(numeroInstrucciones);
         int idProcesoNuevo=this.idProceso++;
@@ -436,7 +432,7 @@ public class CPU {
             estadoProceso=BCP.PREPARADO;
             agregarACola=true; // Indica que se agregue el proceso a la cola.
         }
-        //reverse(pila);
+        
         BCP proceso=new BCP(estadoProceso, idProcesoNuevo, 0, finInicioMemoria[0], finInicioMemoria[1], nucleo,pila,instrucciones);
         procesos.add(proceso);
         if(agregarACola){

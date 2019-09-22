@@ -300,13 +300,12 @@ public class Nucleo {
     }
     
     public void popRegistro(String registro){
-//        System.out.println(Arrays.toString(parametros.toArray()));
+
         if(procesoEjecutando.obtenerDireccionpila()>=inicioMemoria){
             registros[(registroPosicion(registro))] = binarioADecimal(CPU.memoriaVirtual[procesoEjecutando.popPila()].split(" ")[2]);
         }else{
             esperaInterrupcion = true;
             CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PILA));
-           
         }
     }
     
@@ -315,15 +314,13 @@ public class Nucleo {
         List<String> parametrosTemp = procesoEjecutando.obtenerParametros();
         int numeroParametros = parametrosTemp.size();
         if(numeroParametros<11){// Si es menor a 11, entonces caben en la pila.
-            for(int i=numeroParametros-1; i>-1;i--){// Agrego los parámetros a la sección de la memoria usada como pila
+            for(int i=0; i<numeroParametros;i++){// Agrego los parámetros a la sección de la memoria usada como pila
                 CPU.memoriaVirtual[procesoEjecutando.pushPila()]="1111 0000 "+
                         decimalABinaro(Integer.valueOf(parametrosTemp.get(i)));
             }
         }else{// Si no indico el error
             esperaInterrupcion = true;
             CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PARAMETROS));
-            
-            
         }
     }
     
@@ -413,13 +410,7 @@ public class Nucleo {
                
                 CPU.memoriaVirtual[i] = "0000 0000 00000000";
             }
-        }// Esto comentado creo solo sería si se implementa multiples procesos al mismo tiempo para un núcleo
-        /*else{
-            // Si no es el último, entonces se establece en preparado
-            procesoEjecutando.establecerEstado(BCP.PREPARADO);
-        }*/
-       
-            
+        }
         
         procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC,instrucciones);
     }
