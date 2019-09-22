@@ -8,7 +8,6 @@ package proyecto_1;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
@@ -301,9 +300,12 @@ public class Nucleo {
     
     public void popRegistro(String registro){
 //        System.out.println(Arrays.toString(parametros.toArray()));
-        //if(!parametros.empty()){
+        if(procesoEjecutando.obtenerDireccionpila()>=inicioMemoria){
             registros[(registroPosicion(registro))] = binarioADecimal(CPU.memoriaVirtual[procesoEjecutando.popPila()].split(" ")[2]);
-        //}
+        }else{
+            esperaInterrupcion = true;
+            CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PILA));
+        }
     }
     
     private void parametrosAPila(){
@@ -316,7 +318,8 @@ public class Nucleo {
                         decimalABinaro(Integer.valueOf(parametrosTemp.get(i)));
             }
         }else{// Si no indico el error
-
+            esperaInterrupcion = true;
+            CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PARAMETROS));
         }
     }
     
@@ -464,6 +467,16 @@ public class Nucleo {
                 break;
             case Interrupcion.ENTRADA_TECLADO:
                 registros[4]=interrupcion.obtenerValor();
+                guardarContexto(); // Se guardan los valores en el proceso.
+                esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
+                break;
+            case Interrupcion.ERROR_PARAMETROS:
+                procesoEjecutando.establecerEstado(BCP.TERMINADO); // Se establece el proceso como terminado
+                guardarContexto(); // Se guardan los valores en el proceso.
+                esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
+                break;
+            case Interrupcion.ERROR_PILA:
+                procesoEjecutando.establecerEstado(BCP.TERMINADO); // Se establece el proceso como terminado
                 guardarContexto(); // Se guardan los valores en el proceso.
                 esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
                 break;

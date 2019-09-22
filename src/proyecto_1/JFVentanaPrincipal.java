@@ -145,6 +145,16 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
                     case Interrupcion.ENTRADA_TECLADO:
                         taPantalla.setText(taPantalla.getText()+"Ingrese el valor: ");
                         break;
+                    case Interrupcion.ERROR_PARAMETROS:
+                        taPantalla.setText(taPantalla.getText()+"ERROR DE PARÁMETROS, más parámetros...\n...de los permitidos en pila.\n");
+                        interrupcion.establecerComoEjecutada();
+                        interrupcion=null;
+                        return;// Para que no active el tfConsola;
+                    case Interrupcion.ERROR_PILA:
+                        taPantalla.setText(taPantalla.getText()+"ERROR DE PILA, fuera de rango.\n");
+                        interrupcion.establecerComoEjecutada();
+                        interrupcion=null;
+                        return;// Para que no active el tfConsola;
                     default:
                         break;
                 }
