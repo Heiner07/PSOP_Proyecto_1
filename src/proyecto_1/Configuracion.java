@@ -15,16 +15,19 @@ import javax.swing.table.DefaultTableModel;
 public class Configuracion extends javax.swing.JDialog {
 
     DefaultTableModel modeloTablaConfiguracion;
+    Boolean iniciado;
     
     /**
      * Creates new form Configuracion
      * @param parent
      * @param modal
+     * @param iniciado
      */
-    public Configuracion(java.awt.Frame parent, boolean modal) {
+    public Configuracion(java.awt.Frame parent, boolean modal, Boolean iniciado) {
         super(parent, modal);
         initComponents();
         this.modeloTablaConfiguracion = (DefaultTableModel) jTableConfiguracion.getModel();
+        this.iniciado = iniciado;
         cargarTablaConfiguracion();
         this.setLocationRelativeTo(parent);
     }
@@ -163,30 +166,31 @@ public class Configuracion extends javax.swing.JDialog {
     }//GEN-LAST:event_btCancelarActionPerformed
 
     private void btGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btGuardarActionPerformed
-        /*
-        0:loadTemp, 1:storeTemp, 2:movTemp, 3:addTemp,
-        4:subTemp, 5:incTemp, 6:decTemp, 7:jumpTemp,
-        8:cmpTemp, 9:jejneTemp, 10:popTemp, 11:paramTemp
-        */
-        int[] valoresTemporales = new int[12];
-        Boolean nulo=false;
-        Object valor;
-        // Compruebo si algun campo es incorrecto.
-        for(int i=0;i<12;i++){
-            valor=modeloTablaConfiguracion.getValueAt(i, 1);
-            if(valor==null){
-                // Obtengo el dato de la columna valor y la fila indicada por i.
-                String instruccion=(String)modeloTablaConfiguracion.getValueAt(i, 0);
-                nulo=true;
-                JOptionPane.showMessageDialog(this, "El valor \""+instruccion+"\" es incorrecto.", "Valor incorrecto",
-                    JOptionPane.WARNING_MESSAGE);
+        if(!iniciado){ // Si no ha empezado a ejecutar procesos, entonces permito la modificación.
+            /*
+            0:loadTemp, 1:storeTemp, 2:movTemp, 3:addTemp,
+            4:subTemp, 5:incTemp, 6:decTemp, 7:jumpTemp,
+            8:cmpTemp, 9:jejneTemp, 10:popTemp, 11:paramTemp
+            */
+            int[] valoresTemporales = new int[12];
+            Boolean nulo=false;
+            Object valor;
+            // Compruebo si algun campo es incorrecto.
+            for(int i=0;i<12;i++){
+                valor=modeloTablaConfiguracion.getValueAt(i, 1);
+                if(valor==null){
+                    // Obtengo el dato de la columna valor y la fila indicada por i.
+                    String instruccion=(String)modeloTablaConfiguracion.getValueAt(i, 0);
+                    nulo=true;
+                    JOptionPane.showMessageDialog(this, "El valor \""+instruccion+"\" es incorrecto.", "Valor incorrecto",
+                        JOptionPane.WARNING_MESSAGE);
 
-            }else{
-                // Si no es nulo, guardo el valor en el arreglo.
-                valoresTemporales[i]=(Integer)valor;
+                }else{
+                    // Si no es nulo, guardo el valor en el arreglo.
+                    valoresTemporales[i]=(Integer)valor;
+                }
             }
-        }
-        if(!nulo){
+            if(!nulo){
                 // Si ningun valor es nulo, entonces guardo todos los cambios en las variables
                 TiempoInstrucciones.LOAD=valoresTemporales[0];
                 TiempoInstrucciones.STORE=valoresTemporales[1];
@@ -206,6 +210,10 @@ public class Configuracion extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(this, "No se guardaron los cambios.", "Valores Incorrectos",
                     JOptionPane.WARNING_MESSAGE);
             }
+        }else{// Si ya empezó a ejecutar procesos, entonces no se permite modificar.
+            JOptionPane.showMessageDialog(this, "El programa ya está ejecutando procesos, no se pueden modificar los valores.", "No es válido modificar",
+                    JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btGuardarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -26,6 +26,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     int posicionMemoria;
     String rutaArchivo;
     Boolean archivoCargado;
+    Boolean iniciado;
     Interrupcion interrupcion;
     DefaultTableModel modeloTablaArchivos, modeloTablaMemoria, modeloTablaDisco;
     DefaultTableModel modeloTablaColaN1, modeloTablaColaN2;
@@ -54,6 +55,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         this.cpu=new CPU();
         this.interrupcion=null;
         this.archivoCargado=false;
+        this.iniciado=false;
         configuararHilos();
         this.setLocationRelativeTo(null);
     }
@@ -377,6 +379,21 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         panelBCPs.updateUI();
     }
     
+    private void marcarTodosLosArchivos(){
+        int cantidadArchivos=modeloTablaArchivos.getRowCount();
+        for(int i=0;i<cantidadArchivos;i++){
+            modeloTablaArchivos.setValueAt(true,i, 1);
+        }
+    }
+    
+    private void limpiarArchivos(){
+        int numeroFilas = modeloTablaArchivos.getRowCount();
+        for(int i=numeroFilas-1;i>-1;i--){
+            modeloTablaArchivos.removeRow(i);
+        }archivos.clear();
+        jtArchivos.updateUI();
+    }
+    
     private List<String> obtenerArchivosAnalizar(){
         List<String> archivosAnalizar=new ArrayList<>();
         int cantidadArchivos=modeloTablaArchivos.getRowCount();
@@ -425,6 +442,8 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jtArchivos = new javax.swing.JTable();
         btAnalizarArchivo = new javax.swing.JButton();
+        btLimpiarPantalla1 = new javax.swing.JButton();
+        btLimpiarArchivos = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
@@ -475,6 +494,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         tfConsola = new javax.swing.JTextField();
+        btLimpiarPantalla = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -537,6 +557,22 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             }
         });
 
+        btLimpiarPantalla1.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btLimpiarPantalla1.setText("Marcar todos");
+        btLimpiarPantalla1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btLimpiarPantalla1ActionPerformed(evt);
+            }
+        });
+
+        btLimpiarArchivos.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btLimpiarArchivos.setText("Limpiar");
+        btLimpiarArchivos.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btLimpiarArchivosActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -544,20 +580,32 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btAnalizarArchivo)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btCargarArchivo))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btAnalizarArchivo)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btLimpiarPantalla1))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btCargarArchivo)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btLimpiarArchivos)))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btCargarArchivo)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btCargarArchivo)
+                    .addComponent(btLimpiarArchivos))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btAnalizarArchivo)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btAnalizarArchivo)
+                    .addComponent(btLimpiarPantalla1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1059,6 +1107,14 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             }
         });
 
+        btLimpiarPantalla.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        btLimpiarPantalla.setText("Limpiar");
+        btLimpiarPantalla.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btLimpiarPantallaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
         jPanel10.setLayout(jPanel10Layout);
         jPanel10Layout.setHorizontalGroup(
@@ -1066,20 +1122,24 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane6)
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
                     .addComponent(tfConsola)
                     .addGroup(jPanel10Layout.createSequentialGroup()
-                        .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(jLabel5)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel10Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btLimpiarPantalla)))
                 .addContainerGap())
         );
         jPanel10Layout.setVerticalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel4)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(btLimpiarPantalla))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -1242,6 +1302,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         if(!archivos.isEmpty()){
             List<String> archivosAnalizar=obtenerArchivosAnalizar();
             if(!archivosAnalizar.isEmpty()){
+                iniciado=true;
                 // Carga los programas (archivos) al CPU.
                 List<String> errores = cpu.cargarProgramas(archivosAnalizar); // Esta funcion retorna los archivos que fallaron.
                 int cantidadErrores = errores.size();
@@ -1285,7 +1346,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btCargarArchivoActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        Configuracion configuracion = new Configuracion(this, true);
+        Configuracion configuracion = new Configuracion(this, true, iniciado);
         configuracion.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
@@ -1319,9 +1380,24 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_tfConsolaKeyTyped
 
+    private void btLimpiarPantallaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btLimpiarPantallaActionPerformed
+        taPantalla.setText("");
+    }//GEN-LAST:event_btLimpiarPantallaActionPerformed
+
+    private void btLimpiarPantalla1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btLimpiarPantalla1ActionPerformed
+        marcarTodosLosArchivos();
+    }//GEN-LAST:event_btLimpiarPantalla1ActionPerformed
+
+    private void btLimpiarArchivosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btLimpiarArchivosActionPerformed
+        limpiarArchivos();
+    }//GEN-LAST:event_btLimpiarArchivosActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btAnalizarArchivo;
     private javax.swing.JButton btCargarArchivo;
+    private javax.swing.JButton btLimpiarArchivos;
+    private javax.swing.JButton btLimpiarPantalla;
+    private javax.swing.JButton btLimpiarPantalla1;
     private javax.swing.JMenu btMenuConfiguracion;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
