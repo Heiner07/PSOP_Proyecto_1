@@ -17,25 +17,32 @@ public class Interrupcion {
     static final int ERROR_PARAMETROS = 3;
     static final int ERROR_PILA = 4;
     private int numeroNucleo;
+    private int numeroBCP;
     private int numeroInterrupcion;
     private int valor;
     private Boolean listo;
 
-    public Interrupcion(int numeroNucleo, int numeroInterrupcion) {
+    public Interrupcion(int numeroNucleo, int numeroInterrupcion, int numeroBCP) {
         this.numeroNucleo = numeroNucleo;
         this.numeroInterrupcion = numeroInterrupcion;
+        this.numeroBCP = numeroBCP;
         this.listo = false;
     }
     
-    public Interrupcion(int numeroNucleo, int numeroInterrupcion, int valor) {
+    public Interrupcion(int numeroNucleo, int numeroInterrupcion, int numeroBCP, int valor) {
         this.numeroNucleo = numeroNucleo;
         this.numeroInterrupcion = numeroInterrupcion;
+        this.numeroBCP = numeroBCP;
         this.valor = valor;
         this.listo = false;
     }
 
     public int obtenerNumeroNucleo() {
         return numeroNucleo;
+    }
+    
+    public int obtenerNumeroBCP(){
+        return numeroBCP;
     }
 
     public int obtenerNumeroInterrupcion() {

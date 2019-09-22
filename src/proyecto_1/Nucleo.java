@@ -129,15 +129,15 @@ public class Nucleo {
                 switch (registro) {
                     case "0101":
                         //20H
-                        CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.FINALIZAR_PROGRAMA));
+                        CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.FINALIZAR_PROGRAMA, procesoEjecutando.obtenerNumeroProceso()));
                         break;
                     case "0110":
                         //16H
-                        CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.IMPRIMIR, registros[4]));//Imprime registro DX
+                        CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.IMPRIMIR, procesoEjecutando.obtenerNumeroProceso(), registros[4]));//Imprime registro DX
                         break;
                     case "0111":
                         //05H
-                        CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ENTRADA_TECLADO));// Recibe dato en DX
+                        CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ENTRADA_TECLADO, procesoEjecutando.obtenerNumeroProceso()));// Recibe dato en DX
                         break;
                     default:
                         break;
@@ -305,7 +305,7 @@ public class Nucleo {
             registros[(registroPosicion(registro))] = binarioADecimal(CPU.memoriaVirtual[procesoEjecutando.popPila()].split(" ")[2]);
         }else{
             esperaInterrupcion = true;
-            CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PILA));
+            CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PILA, procesoEjecutando.obtenerNumeroProceso()));
         }
     }
     
@@ -320,7 +320,7 @@ public class Nucleo {
             }
         }else{// Si no indico el error
             esperaInterrupcion = true;
-            CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PARAMETROS));
+            CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PARAMETROS, procesoEjecutando.obtenerNumeroProceso()));
         }
     }
     

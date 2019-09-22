@@ -137,23 +137,24 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             if(cpu.obtenerInterrupcion()!=null && !cpu.obtenerInterrupcion().obtenerEstado()){
                 interrupcion=cpu.obtenerInterrupcion();
                 int numeroInterrupcion = interrupcion.obtenerNumeroInterrupcion();
+                String cadenaBCP = "BCP "+interrupcion.obtenerNumeroBCP() +":\n";
                 switch (numeroInterrupcion) {
                     case Interrupcion.FINALIZAR_PROGRAMA:
-                        taPantalla.setText(taPantalla.getText()+"Presione ENTER para finalizar el proceso...");
+                        taPantalla.setText(taPantalla.getText()+cadenaBCP+"Presione ENTER para finalizar el proceso...");
                         break;
                     case Interrupcion.IMPRIMIR:
-                        taPantalla.setText(taPantalla.getText()+interrupcion.obtenerValor()+"\nPresione ENTER para continuar...");
+                        taPantalla.setText(taPantalla.getText()+cadenaBCP+interrupcion.obtenerValor()+"\nPresione ENTER para continuar...");
                         break;
                     case Interrupcion.ENTRADA_TECLADO:
-                        taPantalla.setText(taPantalla.getText()+"Ingrese el valor: ");
+                        taPantalla.setText(taPantalla.getText()+cadenaBCP+"Ingrese el valor: ");
                         break;
                     case Interrupcion.ERROR_PARAMETROS:
-                        taPantalla.setText(taPantalla.getText()+"ERROR DE PARÁMETROS, más parámetros...\n...de los permitidos en pila.\n");
+                        taPantalla.setText(taPantalla.getText()+cadenaBCP+"ERROR DE PARÁMETROS, más parámetros...\n...de los permitidos en pila.\n");
                         interrupcion.establecerComoEjecutada();
                         interrupcion=null;
                         return;// Para que no active el tfConsola;
                     case Interrupcion.ERROR_PILA:
-                        taPantalla.setText(taPantalla.getText()+"ERROR DE PILA, fuera de rango.\n");
+                        taPantalla.setText(taPantalla.getText()+cadenaBCP+"ERROR DE PILA, fuera de rango.\n");
                         interrupcion.establecerComoEjecutada();
                         interrupcion=null;
                         return;// Para que no active el tfConsola;
