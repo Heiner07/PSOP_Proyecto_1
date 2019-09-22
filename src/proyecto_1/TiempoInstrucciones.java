@@ -12,8 +12,8 @@ package proyecto_1;
 public class TiempoInstrucciones {
     static int LOAD = 5;
     static int STORE = 10;
-    static int MOV = 0;
-    static int ADD = 0;
+    static int MOV = 1;
+    static int ADD = 1;
     static int SUB = 3;
     static int INC = 1;
     static int DEC = 1;

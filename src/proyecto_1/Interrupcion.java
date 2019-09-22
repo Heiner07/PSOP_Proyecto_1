@@ -14,6 +14,8 @@ public class Interrupcion {
     static final int FINALIZAR_PROGRAMA = 0;
     static final int IMPRIMIR = 1;
     static final int ENTRADA_TECLADO = 2;
+    static final int ERROR_PARAMETROS = 3;
+    static final int ERROR_PILA = 4;
     private int numeroNucleo;
     private int numeroInterrupcion;
     private int valor;
