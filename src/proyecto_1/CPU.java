@@ -436,7 +436,7 @@ public class CPU {
             estadoProceso=BCP.PREPARADO;
             agregarACola=true; // Indica que se agregue el proceso a la cola.
         }
-       // reverse(pila);
+        //reverse(pila);
         BCP proceso=new BCP(estadoProceso, idProcesoNuevo, 0, finInicioMemoria[0], finInicioMemoria[1], nucleo,pila,instrucciones);
         procesos.add(proceso);
         if(agregarACola){

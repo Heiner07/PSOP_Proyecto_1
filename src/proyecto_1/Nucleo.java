@@ -36,6 +36,7 @@ public class Nucleo {
     private int tiempoRestante=1; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
     private int inicioMemoria, finMemoria;
     private String instrucciones;
+    private boolean banderaInterrupcion=false;
     public Nucleo(int numeroNucleo){
         this.numeroNucleo = numeroNucleo;
         timerOperacion = new Timer(1000, new ActionListener() {
@@ -305,10 +306,7 @@ public class Nucleo {
         }else{
             esperaInterrupcion = true;
             CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PILA));
-            for(int i=procesoEjecutando.obtenerInicioMemoria();i<=procesoEjecutando.obtenerFinMemoria();i++){
-               
-                CPU.memoriaVirtual[i] = "0000 0000 00000000";
-            }
+           
         }
     }
     
@@ -324,10 +322,7 @@ public class Nucleo {
         }else{// Si no indico el error
             esperaInterrupcion = true;
             CPU.interrupciones.add(new Interrupcion(this.numeroNucleo, Interrupcion.ERROR_PARAMETROS));
-            for(int i=procesoEjecutando.obtenerInicioMemoria();i<=procesoEjecutando.obtenerFinMemoria();i++){
-               
-                CPU.memoriaVirtual[i] = "0000 0000 00000000";
-            }
+            
             
         }
     }
@@ -408,8 +403,9 @@ public class Nucleo {
      */
     private void guardarContexto(){
         //System.out.println("PC: "+PC+ " finMemoria: "+procesoEjecutando.obtenerFinMemoria());
-        if(PC>procesoEjecutando.obtenerFinMemoria() && procesoEjecutando.obtenerEstadoProceso()!=BCP.TERMINADO){
+        if((PC>procesoEjecutando.obtenerFinMemoria() && procesoEjecutando.obtenerEstadoProceso()!=BCP.TERMINADO) || banderaInterrupcion){
             // Si el pc supera al fin de memoria, entonces se llegó a la última instrucción
+            banderaInterrupcion = false;
             procesoEjecutando.establecerEstado(BCP.TERMINADO);
             // Si el proceso ha terminado, entonces se limpia la memoria.
             //System.out.println("LIMPIA MEMORIA DE: "+procesoEjecutando.obtenerNumeroProceso());
@@ -470,7 +466,8 @@ public class Nucleo {
         int numeroInterrupcion = interrupcion.obtenerNumeroInterrupcion();
         switch (numeroInterrupcion) {
             case Interrupcion.FINALIZAR_PROGRAMA:
-                procesoEjecutando.establecerEstado(BCP.TERMINADO); // Se establece el proceso como terminado
+               // procesoEjecutando.establecerEstado(BCP.TERMINADO); // Se establece el proceso como terminado
+                banderaInterrupcion=true;
                 guardarContexto(); // Se guardan los valores en el proceso.
                 esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
                 break;
@@ -484,12 +481,14 @@ public class Nucleo {
                 esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
                 break;
             case Interrupcion.ERROR_PARAMETROS:
-                procesoEjecutando.establecerEstado(BCP.TERMINADO); // Se establece el proceso como terminado
+                //procesoEjecutando.establecerEstado(BCP.TERMINADO); // Se establece el proceso como terminado
+                banderaInterrupcion=true;
                 guardarContexto(); // Se guardan los valores en el proceso.
                 esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
                 break;
             case Interrupcion.ERROR_PILA:
-                procesoEjecutando.establecerEstado(BCP.TERMINADO); // Se establece el proceso como terminado
+                //procesoEjecutando.establecerEstado(BCP.TERMINADO); // Se establece el proceso como terminado
+                banderaInterrupcion=true;
                 guardarContexto(); // Se guardan los valores en el proceso.
                 esperaInterrupcion=false; // Se establece que el núcleo ya no está a la espera de la interrupción
                 break;
