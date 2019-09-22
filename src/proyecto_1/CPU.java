@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import static java.util.Collections.reverse;
 import java.util.List;
 import java.util.Stack;
@@ -44,7 +45,7 @@ public class CPU {
     static List<Trabajo> colaImprimir1,colaImprimir2;
 
     /* Hilos de Control */
-    private Timer timerControlColasNucleos, timerControlMemoriaVirtual, timerControlInterrupciones;
+    private Timer timerControlColasNucleos, timerControlMemoriaVirtual, timerControlInterrupciones,timerControlProcesos;
     
     public CPU(){
         this.interrupcionEnEjecucion = null;
@@ -87,6 +88,7 @@ public class CPU {
         configurarHiloColasNucleos();
         configurarHiloMemoriaVirtual();
         configurarHiloInterrupciones();
+        configurarHiloProcesos();
     }
     
     /**
@@ -165,6 +167,7 @@ public class CPU {
                     // Función que repetirá según el intervalo asignado (1 segundo).
                     verificarColas();
                     
+                    
                 } catch (InterruptedException ex) {
                     // Modificar para mostrar mensaje correspondiente.
                     Logger.getLogger(CPU.class.getName()).log(Level.SEVERE, null, ex);
@@ -174,7 +177,18 @@ public class CPU {
         // Inicializo el timer.
         timerControlColasNucleos.start();
     }
-    
+    /**
+     * Establece la funcion para el timer timerControlProcesos que se encargará de enviar...
+     * ...los procesos constantemente
+     */
+    private void configurarHiloProcesos(){
+        timerControlProcesos = new Timer(1000, (ActionEvent ae) -> {
+            // Modificar para mostrar mensaje correspondiente.           
+            verificarProcesos();
+        });
+        // Inicializo el timer.
+        timerControlProcesos.start();
+    }
     /**
      * Verifica cuando un núcleo queda disponible y le envía el proceso siguiente.
      * Función llamada por el timerControlColasNucleos.
@@ -212,8 +226,31 @@ public class CPU {
         }
     }
     
+    /*
+    Verifica constantemente cuando los procesos estan en espera de ser colocados a la memoria.
+    Lo llama el hilo correspondiente
+    Si tiene espacio en memoria, edita las posiciones de memoria.
+    */
+    public void verificarProcesos(){
+        for(int i=0;i<procesos.size();i++){        
+            BCP proc = procesos.get(i);
+            if(proc.obtenerInicioMemoria() == -1 && (proc.obtenerEstadoProceso()==BCP.NUEVO)){
+                System.out.println("Proceso: "+proc.obtenerNumeroProceso());
+                int[] finInicioMemoria = determinarPosicionesMemoria(proc.obtenerInstruccionesMemoria().size());
+                System.out.println("CAMBIO");
+                if(finInicioMemoria[0] != -1){
+                    // Si hay espacio, entonces sí se cargar las instrucciones en memoria.
+                    cargarInstrucciones(finInicioMemoria[0],finInicioMemoria[1],proc.obtenerInstruccionesMemoria());
+                    agregarProcesoCola(proc.obtenerNucleo(),proc.obtenerNumeroProceso());
+                    proc.actualizarProceso(BCP.PREPARADO,finInicioMemoria[0],finInicioMemoria[1]);
+                    
+                
+                }//SALE IF2
+            
+            }//SALE IF1
+        }//SALE FOR
     
-    
+    }
     
     public BCP retornarProceso(int numeroCola){
         if(numeroCola == 1){
@@ -268,19 +305,16 @@ public class CPU {
                numProceso = 0;          
             }
             int proc;
-            //System.out.println("procesoCola1: "+numProceso+" colaTrabajoN1.size: "+largoCola);
             for(;numProceso<=largoCola;numProceso++){
                 proc = colaTrabajoN1.get(numProceso).numeroBCP;
                 BCP procesoAEjecutar = obtenerBCP(proc);
-               // System.out.println(procesoAEjecutar.obtenerPC()+" <= "+ procesoAEjecutar.obtenerFinMemoria());
                 if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
                     trabajo=new Trabajo(0, proc,memoriaVirtual[procesoAEjecutar.obtenerPC()]);
-                    
                     colaImprimir1.add(trabajo);
                     
                 }
                               
-            }  //System.out.println("\n\n");
+            }  
            
         }else{
            
@@ -290,11 +324,9 @@ public class CPU {
                numProceso = 0;          
             }
             int proc;
-            //System.out.println("procesoCola1: "+numProceso+" colaTrabajoN1.size: "+largoCola);
             for(;numProceso<=largoCola;numProceso++){
                 proc = colaTrabajoN2.get(numProceso).numeroBCP;
-                BCP procesoAEjecutar = obtenerBCP(proc);
-                //System.out.println(procesoAEjecutar.obtenerPC()+" <= "+ procesoAEjecutar.obtenerFinMemoria());
+                BCP procesoAEjecutar = obtenerBCP(proc);          
                 if(procesoAEjecutar.obtenerPC() <= procesoAEjecutar.obtenerFinMemoria() && procesoAEjecutar.obtenerEstadoProceso()!=BCP.TERMINADO){
                     trabajo=new Trabajo(1, proc,memoriaVirtual[procesoAEjecutar.obtenerPC()]);
                     colaImprimir2.add(trabajo);
@@ -341,16 +373,6 @@ public class CPU {
         return interrupcionEnEjecucion;
     }
     
-    private void verificaProcesos(){
-        int numeroProcesos=procesos.size();
-        BCP proceso;
-        for(int i=0;i<numeroProcesos;i++){
-            proceso=procesos.get(i);
-            if(proceso.obtenerEstadoProceso()==BCP.EN_ESPERA){
-                
-            }
-        }
-    }
     
     
     
@@ -409,7 +431,7 @@ public class CPU {
         Boolean agregarACola=false; // Me indica si agrego el proceso a una cola.
         if(finInicioMemoria[0]==-1){
             // Si no hay espacio, entonces no se cargan las instrucciones en memoria.
-            estadoProceso=BCP.EN_ESPERA;
+            estadoProceso=BCP.NUEVO;
         }else{
             // Si hay espacio, entonces sí se cargar las instrucciones en memoria.
             cargarInstrucciones(finInicioMemoria[0],finInicioMemoria[1],instrucciones);
@@ -417,12 +439,12 @@ public class CPU {
             agregarACola=true; // Indica que se agregue el proceso a la cola.
         }
         reverse(pila);
-        BCP proceso=new BCP(estadoProceso, idProcesoNuevo, 0, finInicioMemoria[0], finInicioMemoria[1], nucleo,pila);
+        BCP proceso=new BCP(estadoProceso, idProcesoNuevo, 0, finInicioMemoria[0], finInicioMemoria[1], nucleo,pila,instrucciones);
         procesos.add(proceso);
         if(agregarACola){
             // Lo agrego aquí para que sea agregado a la cola después de agregar el proceso a la lista de procesos...
             // ...para que no genere conflicto (muy poco probable) con los hilos.
-            agregarProcesoCola(nucleo,idProcesoNuevo, numeroInstrucciones);
+            agregarProcesoCola(nucleo,idProcesoNuevo);
         }
     }
     
@@ -436,7 +458,7 @@ public class CPU {
         for(int i=0; inicioMemoria<=finMemoria; inicioMemoria++,i++){
             parteOperacion = instrucciones.get(i).split(" ");
             instruccionEnbits = parteOperacion[0];
-            
+           
             if("INC".equals(instruccionEnbits) || "DEC".equals(instruccionEnbits)){                
                  if(parteOperacion.length == 2){
                     CPU.memoriaVirtual[inicioMemoria] = toBinario(instruccionEnbits)+" "+toBinario(parteOperacion[1])+" 00000000";
@@ -528,7 +550,7 @@ public class CPU {
         return temp;
     }
     
-    private void agregarProcesoCola(int nucleo, int idProcesoNuevo, int numeroInstrucciones){
+    private void agregarProcesoCola(int nucleo, int idProcesoNuevo){
         Trabajo trabajo;
         if(nucleo==0){
             
@@ -563,8 +585,9 @@ public class CPU {
         *  Entiendase por ordenado como: el inicio de memoria del bloque siguiente es el más cercano...
         *  ...con respecto al fin de memoria del bloque anterior.
         */
-        for(int i=0;i<numeroProcesos;i++){
-            proceso=procesos.get(i);
+        
+        for(int i=0;i<CPU.LARGOMEMORIAVIRTUAL;i++){
+           /* proceso=procesos.get(i);
             if(finMemoria!=-1){
                 if(proceso.obtenerFinMemoria()-finMemoriaTemp>=memoriaRequerida+1){
                     inicioMemoria=finMemoriaTemp+1;
@@ -574,24 +597,47 @@ public class CPU {
                     break;
                 }
             }finMemoriaTemp=proceso.obtenerFinMemoria();
+            */
+           if(!hayEspacio){
+                if(CPU.memoriaVirtual[i].equals("0000 0000 00000000")){
+                    int memoriaAcumulada=0;
+                     for(int k=i;k<CPU.LARGOMEMORIAVIRTUAL;k++){
+                         System.out.println(CPU.memoriaVirtual[k]);
+                         if(CPU.memoriaVirtual[k].equals("0000 0000 00000000")){
+                             memoriaAcumulada++;
+                             if(memoriaAcumulada == memoriaRequerida){
+                                 inicioMemoria = i;
+                                 finMemoria = k;
+                                 hayEspacio = true;
+                                 break;
+                             }
+
+                         }else{
+                             break;
+                         }
+                     }//SALE FOR
+                }//SALE IF
+           }//SALE IF
+           else break;
+           
         }
-        
+        System.out.println("inicio: "+inicioMemoria + " fin: "+finMemoria);
         if(hayEspacio){
             // Si hay espacio, retorno las posiciones encontradas.
             return new int[]{inicioMemoria, finMemoria};
         }else{
-            // Si no hay espacio según lo anterior, pueden pasar tres cosas:
+            /*// Si no hay espacio según lo anterior, pueden pasar tres cosas:
             if(numeroProcesos==0 && memoriaRequerida<CPU.LARGOMEMORIAVIRTUAL){
                 // No hay bloques y el programa cabe en memoria
                 return new int[]{0, memoriaRequerida-1};
             }else if(CPU.LARGOMEMORIAVIRTUAL-finMemoriaTemp>=memoriaRequerida+1){
                 // Hay espacio después del ultimo bloque.
                 return new int[]{finMemoriaTemp+1, finMemoriaTemp+memoriaRequerida};
-            }else{
+            }else{*/
                 // No hay espacio para el bloque
                 return new int[]{ -1,-1};
+            
             }
-        }
     }
     
     /**

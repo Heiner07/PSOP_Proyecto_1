@@ -7,6 +7,7 @@ package proyecto_1;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.Stack;
 import javax.swing.Timer;
 
@@ -35,8 +36,9 @@ public class BCP {
     //Limites de memoria
     private int inicioMemoria, finMemoria;
     private String instrucciones;
+    private List<String> instruccionesMemoria;
     
-    public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria, int nucleo,Stack<String> parametros ){
+    public BCP(int estadoProceso, int numeroProceso, int direccionPila, int inicioMemoria, int finMemoria, int nucleo,Stack<String> parametros,List<String> instruccionesMemoria){
         this.AX=0;
         this.BX=0;
         this.CX=0;
@@ -53,6 +55,7 @@ public class BCP {
         this.nucleo=nucleo;
         this.segundos=0;     
         this.parametros = parametros;
+        this.instruccionesMemoria = instruccionesMemoria;
         this.timer=new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -61,7 +64,14 @@ public class BCP {
         });
         this.timer.start();
     }
+    public void actualizarProceso(int estadoProceso,int inicioMemoria, int finMemoria){
+        this.estadoProceso=estadoProceso;
+        this.inicioMemoria = inicioMemoria;
+        this.finMemoria = finMemoria;
+        this.PC= inicioMemoria;
+        
     
+    }
     /**
      * Función llamada por el timer que controla el tiempo de ejecución del proceso.
      * Solo aumenta el tiempo si el estado del proceso está en ejecución.
@@ -71,7 +81,12 @@ public class BCP {
             segundos++;
         }
     }
-    
+    public int obtenerNucleo(){
+        return nucleo;
+    }
+    public List <String> obtenerInstruccionesMemoria(){
+        return instruccionesMemoria;
+    }
     public void establecerRegistros(int AX, int BX, int CX, int DX, int IR, int AC, int PC,Stack<String> parametros,String instrucciones  ){
         this.AX=AX;
         this.BX=BX;

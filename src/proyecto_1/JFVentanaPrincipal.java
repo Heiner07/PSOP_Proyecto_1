@@ -139,7 +139,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
      */
     private void controlGraficoDisco(){
         String[] instruccion;
-        for(int i=0;i<CPU.LARGODISCO;i++){
+        for(int i=0;i<10;i++){
             instruccion = CPU.disco[i].split(" ");
             modeloTablaDisco.setValueAt(instruccion[0], i, 1);
             modeloTablaDisco.setValueAt(instruccion[1], i, 2);
@@ -167,7 +167,7 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
      */
     private void controlGraficoMemoria(){
         String[] instruccion;
-        for(int i=0;i<CPU.LARGOMEMORIA;i++){
+        for(int i=0;i<10;i++){
             instruccion = CPU.memoriaVirtual[i].split(" ");
             modeloTablaMemoria.setValueAt(instruccion[0], i, 1);
             modeloTablaMemoria.setValueAt(instruccion[1], i, 2);

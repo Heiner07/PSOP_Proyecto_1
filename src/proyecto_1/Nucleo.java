@@ -332,6 +332,7 @@ public class Nucleo {
      * @throws InterruptedException 
      */
     public void recibirProceso(BCP proceso) throws InterruptedException{
+        //System.out.println("RECIBO PROCESO: "+proceso.obtenerNumeroProceso());
         if(procesoEjecutando==null){
             // Si no hay proceso asignado, entonces solo se establece el entrante.
             establecerContexto(proceso);
@@ -353,20 +354,23 @@ public class Nucleo {
      */
     private void guardarContexto(){
         //System.out.println("PC: "+PC+ " finMemoria: "+procesoEjecutando.obtenerFinMemoria());
-        if(PC>procesoEjecutando.obtenerFinMemoria()){
+        if(PC>procesoEjecutando.obtenerFinMemoria() && procesoEjecutando.obtenerEstadoProceso()!=BCP.TERMINADO){
             // Si el pc supera al fin de memoria, entonces se llegó a la última instrucción
             procesoEjecutando.establecerEstado(BCP.TERMINADO);
+            // Si el proceso ha terminado, entonces se limpia la memoria.
+            System.out.println("LIMPIA MEMORIA DE: "+procesoEjecutando.obtenerNumeroProceso());
+            for(int i=procesoEjecutando.obtenerInicioMemoria();i<=procesoEjecutando.obtenerFinMemoria();i++){
+               
+                CPU.memoriaVirtual[i] = "0000 0000 00000000";
+            }
         }// Esto comentado creo solo sería si se implementa multiples procesos al mismo tiempo para un núcleo
         /*else{
             // Si no es el último, entonces se establece en preparado
             procesoEjecutando.establecerEstado(BCP.PREPARADO);
         }*/
-        if(procesoEjecutando.obtenerEstadoProceso()==BCP.TERMINADO){
-            // Si el proceso ha terminado, entonces se limpia la memoria.
-            for(int i=inicioMemoria;i<=finMemoria;i++){
-                CPU.memoriaVirtual[i] = "0000 0000 00000000";
-            }
-        }
+       
+            
+        
         procesoEjecutando.establecerRegistros(registros[1], registros[2], registros[3], registros[4], IR, registros[0],PC,parametros,instrucciones);
     }
     
@@ -399,7 +403,7 @@ public class Nucleo {
     private void cambioContexto(BCP procesoEntrante){
         guardarContexto();
         if(procesoEjecutando.obtenerEstadoProceso()!=BCP.TERMINADO){
-            procesoEjecutando.establecerEstado(BCP.EN_ESPERA);
+            procesoEjecutando.establecerEstado(BCP.PREPARADO);
         }      
         establecerContexto(procesoEntrante);
     }
