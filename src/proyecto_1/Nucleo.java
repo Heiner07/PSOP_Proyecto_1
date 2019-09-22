@@ -70,15 +70,17 @@ public class Nucleo {
         }
     }
     
+    /**
+     * Se encarga de realizar las operaciones correspondientes a la instrucción que entre
+     *
+     */
     private void Operaciones() throws InterruptedException{
         // Asigno el IR
         IR=PC;
         instruccionIR=CPU.memoriaVirtual[IR];
         procesoEjecutando.establecerCadenaInstruccionIR(instruccionIR);
         // Traigo la instrucción de memoria y aumento el PC
-
-        instrucciones = CPU.memoriaVirtual[PC++];
-        
+        instrucciones = CPU.memoriaVirtual[PC++];      
         String[] parts;
         parts = instrucciones.split(" ");
         String operacion = parts[0];
@@ -300,7 +302,6 @@ public class Nucleo {
     }
     
     public void popRegistro(String registro){
-
         if(procesoEjecutando.obtenerDireccionpila()>=inicioMemoria){
             registros[(registroPosicion(registro))] = binarioADecimal(CPU.memoriaVirtual[procesoEjecutando.popPila()].split(" ")[2]);
         }else{
@@ -378,7 +379,6 @@ public class Nucleo {
      * @throws InterruptedException 
      */
     public void recibirProceso(BCP proceso) throws InterruptedException{
-        //System.out.println("RECIBO PROCESO: "+proceso.obtenerNumeroProceso());
         if(procesoEjecutando==null){
             // Si no hay proceso asignado, entonces solo se establece el entrante.
             establecerContexto(proceso);
@@ -399,13 +399,11 @@ public class Nucleo {
      * Esta función se llama para el cambio de contexto y cada vez que termina Operaciones (Para reflejar los cambios en la interfaz)
      */
     private void guardarContexto(){
-        //System.out.println("PC: "+PC+ " finMemoria: "+procesoEjecutando.obtenerFinMemoria());
         if((PC>procesoEjecutando.obtenerFinMemoria() && procesoEjecutando.obtenerEstadoProceso()!=BCP.TERMINADO) || banderaInterrupcion){
             // Si el pc supera al fin de memoria, entonces se llegó a la última instrucción
             banderaInterrupcion = false;
             procesoEjecutando.establecerEstado(BCP.TERMINADO);
             // Si el proceso ha terminado, entonces se limpia la memoria.
-            //System.out.println("LIMPIA MEMORIA DE: "+procesoEjecutando.obtenerNumeroProceso());
             for(int i=procesoEjecutando.obtenerInicioMemoria();i<=procesoEjecutando.obtenerFinMemoria();i++){
                
                 CPU.memoriaVirtual[i] = "0000 0000 00000000";
