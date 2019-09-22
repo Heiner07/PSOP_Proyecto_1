@@ -34,7 +34,7 @@ public class Nucleo {
     private Boolean esperaInterrupcion = false; // Indica si el núcleo está a la espera que se complete una interrupción.
     private Timer timerOperacion;
     private int tiempoRestante=1; // Variable que indicara cuantos segendos debe esperar hasta recibir otra instrucción
-    private int inicioMemoria, finMemoria;
+    private int inicioMemoria;
     private String instrucciones;
     private boolean banderaInterrupcion=false;
     public Nucleo(int numeroNucleo){
@@ -154,8 +154,6 @@ public class Nucleo {
                 }           
                 
                 PC += decimal;
-                //tem.out.println("PC: "+PC+" Decimal: "+decimal);
-
                 
                 break;
             case "1010"://CMP Val1,Val2
@@ -208,7 +206,7 @@ public class Nucleo {
         }
     }
     
-    public static int registroPosicion(String registro){       
+    private static int registroPosicion(String registro){       
         switch(registro) {
             case "0001"://AX                    
                  return 1;   
@@ -225,7 +223,7 @@ public class Nucleo {
     
     
     
-    public void movimiento(String registro, String numero){
+    private void movimiento(String registro, String numero){
         int numeroDecimal;
         if(numero.length() == 8){
             numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
@@ -240,7 +238,7 @@ public class Nucleo {
         
     }
     
-    public void sumar(String registro, String numero){     
+    private void sumar(String registro, String numero){     
         int numeroDecimal;
         if(numero.length() == 8){
             numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
@@ -259,7 +257,7 @@ public class Nucleo {
     }
     
     
-    public void restar(String registro, String numero){
+    private void restar(String registro, String numero){
         int numeroDecimal;
         if(numero.length() == 8){
             numeroDecimal = Integer.parseInt(numero.substring(1, 8),2);
@@ -277,7 +275,7 @@ public class Nucleo {
         }
     }
     
-    public void incrementar(String registro){
+    private void incrementar(String registro){
         if(registro.equals("0000")){
             registros[0] += 1;
         }else{
@@ -286,7 +284,7 @@ public class Nucleo {
         }       
     }
     
-    public void decrementar(String registro){
+    private void decrementar(String registro){
         if(registro.equals("0000")){
             registros[0] -= 1;
         }else{
@@ -295,13 +293,13 @@ public class Nucleo {
         }       
     }
     
-    public void compararValores(String val1,String val2){
+    private void compararValores(String val1,String val2){
         int numeroDecimal1 = registros[(registroPosicion(val1))];      
         int numeroDecimal2 = registros[registroPosicion(val2.substring(5, 9))];
         bandera = numeroDecimal1 == numeroDecimal2;
     }
     
-    public void popRegistro(String registro){
+    private void popRegistro(String registro){
         if(procesoEjecutando.obtenerDireccionpila()>=inicioMemoria){
             registros[(registroPosicion(registro))] = binarioADecimal(CPU.memoriaVirtual[procesoEjecutando.popPila()].split(" ")[2]);
         }else{
@@ -325,7 +323,7 @@ public class Nucleo {
         }
     }
     
-    public String decimalABinaro(int a) {
+    private String decimalABinaro(int a) {
         boolean negativo = false;
         if(a<0){
             a *=-1;
@@ -428,7 +426,7 @@ public class Nucleo {
         IR=registrosProceso[4];
         PC=registrosProceso[6];
         inicioMemoria = procesoEntrante.obtenerInicioMemoria();
-        finMemoria = procesoEntrante.obtenerFinMemoria();
+        //finMemoria = procesoEntrante.obtenerFinMemoria();
         procesoEjecutando=procesoEntrante;
         procesoEjecutando.establecerEstado(BCP.EN_EJECUCION);
     }

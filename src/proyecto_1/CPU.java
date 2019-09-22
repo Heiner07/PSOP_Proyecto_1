@@ -230,7 +230,7 @@ public class CPU {
     Lo llama el hilo correspondiente
     Si tiene espacio en memoria, edita las posiciones de memoria.
     */
-    public void verificarProcesos(){
+    private void verificarProcesos(){
         for(int i=0;i<procesos.size();i++){        
             BCP proc = procesos.get(i);
             if(proc.obtenerInicioMemoria() == -1 && (proc.obtenerEstadoProceso()==BCP.NUEVO)){
@@ -254,7 +254,7 @@ public class CPU {
      * Con respecto a numeroCola que ingresa ya sea 1 o 2
      * @param numeroCola
      * @return  un BCP*/
-    public BCP retornarProceso(int numeroCola){
+    private BCP retornarProceso(int numeroCola){
         if(numeroCola == 1){
             int largoCola = colaTrabajoN1.size()-1;
             
@@ -292,7 +292,7 @@ public class CPU {
      * e instrucciones que se van a ejecutar
      * @param numeroCola
      */
-    public void listadoColas(int numeroCola){
+    private void listadoColas(int numeroCola){
         Trabajo trabajo;
         int numProceso;
         if(numeroCola == 1){           
@@ -383,7 +383,7 @@ public class CPU {
      * Si hay espacio para crear un bloque se agregan a memoria, sino se pone a la espera. 
      * @param instruccionesTemp
      */
-    public void crearProceso(List<String> instruccionesTemp){
+    private void crearProceso(List<String> instruccionesTemp){
         String[] obtenerParametros;
         List<String> pila = new ArrayList<>();
         List<String> instrucciones = new ArrayList<>();
@@ -557,8 +557,7 @@ public class CPU {
      * @param memoriaRequerida
      * @return int[]
      */
-    @SuppressWarnings("empty-statement")
-    public int[] determinarPosicionesMemoria(int memoriaRequerida){
+    private int[] determinarPosicionesMemoria(int memoriaRequerida){
         int inicioMemoria = -1, finMemoria = -1;
         Boolean hayEspacio = false;      
         /* 
@@ -606,7 +605,7 @@ public class CPU {
      * @throws FileNotFoundException
      * @throws IOException 
      */
-    public List<String> obtenerIntruccionesArchivo(String archivo) throws FileNotFoundException, IOException{
+    private List<String> obtenerIntruccionesArchivo(String archivo) throws FileNotFoundException, IOException{
         String cadena;
         List<String> instrucciones = new ArrayList<>();
         

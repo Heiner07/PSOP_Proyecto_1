@@ -242,18 +242,6 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
      * Este método es invocado por el timer timerControlColaNucleos.
      */
     private void controlGraficoColaNucleos(){
-        // Obtengo todos los procesos del CPU
-        /*List<Trabajo> colaN1 = cpu.obtenerColaTrabajoN1();
-        List<Trabajo> colaN2 = cpu.obtenerColaTrabajoN2();
-        int numeroProcesosColaN1 = colaN1.size();
-        int numeroProcesosColaN2 = colaN2.size();
-        limpiarColas();
-        for(int i=0;i<numeroProcesosColaN1;i++){
-            modeloTablaColaN1.addRow(new Object[]{"BCP "+colaN1.get(i).obtenerNumeroBCP()});
-        }
-        for(int i=0;i<numeroProcesosColaN2;i++){
-            modeloTablaColaN2.addRow(new Object[]{"BCP "+colaN2.get(i).obtenerNumeroBCP()});
-        }*/
         
         List<Trabajo> colaN1 = CPU.colaImprimir1;
         List<Trabajo> colaN2 = CPU.colaImprimir2;
@@ -268,7 +256,6 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
             modeloTablaColaN2.addRow(new Object[]{"BCP"+colaN2.get(i).obtenerNumeroBCP()+"   "+colaN2.get(i).obtenerInstruccion()});
             
         }
-        
        
     }
     
@@ -330,8 +317,6 @@ public class JFVentanaPrincipal extends javax.swing.JFrame {
         lbCXN2.setText(String.valueOf(registrosN2[3]));
         lbDXN2.setText(String.valueOf(registrosN2[4]));
         
-        // Actualizo el panel de BCPs
-        //panelBCPs.updateUI();
     }
     
     /**
